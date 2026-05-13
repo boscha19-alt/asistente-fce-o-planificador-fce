@@ -4,26 +4,38 @@ import extra_streamlit_components as stx
 import json
 from itertools import product
 
-# --- CONFIGURACIÓN ESTÉTICA ---
-st.set_page_config(page_title="Inscripción FCE UBA", layout="wide")
+# --- CONFIGURACIÓN ESTÉTICA ZEN ---
+st.set_page_config(page_title="FCE UBA - Planificador Oficial", layout="wide")
 
-# CSS para suavizar la interfaz
 st.markdown("""
     <style>
-    .main { background-color: #fdfdfd; }
-    .stButton>button { border-radius: 20px; border: 1px solid #d1d5db; background-color: white; color: #374151; }
-    .stButton>button:hover { background-color: #f9fafb; border-color: #9ca3af; }
-    h1, h2, h3 { color: #1f2937; font-weight: 600; }
-    .stExpander { border: none !important; box-shadow: none !important; background-color: #f9fafb !important; border-radius: 10px !important; }
-    div[data-testid="stExpander"] div[role="button"] p { font-weight: 600; color: #4b5563; }
-    .materia-card { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 10px; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+    .stApp { background-color: #F8FAFC; }
+    .materia-card { 
+        background: white; padding: 20px; border-radius: 15px; 
+        border: 1px solid #E2E8F0; margin-bottom: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .status-badge {
+        padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600;
+    }
+    .alta { background-color: #DCFCE7; color: #166534; }
+    .media { background-color: #FEF9C3; color: #854D0E; }
+    .baja { background-color: #FEE2E2; color: #991B1B; }
+    .sidebar-content { padding: 10px; }
+    /* Estilo para los botones */
+    .stButton>button {
+        width: 100%; border-radius: 10px; background-color: white; border: 1px solid #E2E8F0;
+        color: #475569; transition: all 0.3s;
+    }
+    .stButton>button:hover { border-color: #94A3B8; background-color: #F1F5F9; }
     </style>
     """, unsafe_allow_html=True)
 
 cookie_manager = stx.CookieManager()
 
-# --- 1. BASE DE DATOS MAESTRA (DEFINICIÓN DE TODAS LAS MATERIAS) ---
-# Se agregaron TODAS las materias de tus fotos para evitar el KeyError
+# --- 1. BASE DE DATOS MAESTRA (Subjects) ---
 DB_MATERIAS = {
     241: "Análisis Matemático I", 242: "Economía", 243: "Sociología", 244: "Metodología de las Cs. Soc.", 
     245: "Álgebra", 246: "Hist. Económica y Social Gral.", 247: "Teoría Contable", 248: "Estadística I", 
@@ -32,167 +44,140 @@ DB_MATERIAS = {
     256: "Inst. de Gobierno y Economía Política", 262: "Macroeconomía I", 272: "Análisis Matemático II", 
     273: "Inst. de Derecho Privado", 274: "Sistemas Administrativos", 275: "Tecnología de la Información", 
     276: "Cálculo Financiero", 278: "Macroeconomía y Política Económica", 279: "Administración Financiera", 
-    283: "Macroeconomía II", 284: "Análisis Matemático II", 286: "Microeconomía II", 288: "Matemática para Economistas", 
-    290: "Microeconomía I", 291: "Microeconomía para Economistas", 351: "Sistemas Contables", 
-    353: "Sistemas de Costos", 354: "Derecho del Trabajo y Seg. Social", 355: "Auditoría", 
+    283: "Macroeconomía II", 286: "Microeconomía II", 288: "Matemática para Economistas", 291: "Microeconomía para Economistas", 
+    351: "Sistemas Contables", 353: "Sistemas de Costos", 354: "Derecho del Trabajo y Seg. Social", 355: "Auditoría", 
     356: "Teoría y Técnica Impositiva I", 357: "Teoría y Técnica Impositiva II", 362: "Gestión y Costos (Contadores)", 
-    451: "Estadística para Administradores", 452: "Sociología de la Organización", 453: "Admin. de la Producción", 
-    455: "Régimen Tributario", 457: "Teoría de la Decisión", 458: "Planeamiento a Largo Plazo", 
-    460: "Seminario de Integración", 462: "Derecho Empresarial", 463: "Gestión de Tecnologías Digitales", 
+    453: "Admin. de la Producción", 462: "Derecho Empresarial", 463: "Gestión de Tecnologías Digitales", 
     464: "Gestión de Costos", 465: "Métodos Predictivos para la Gestión", 466: "Administración de Operaciones", 
     467: "Gestión del Talento", 468: "Administración Tributaria", 469: "Marketing", 470: "Ciencias de la Decisión", 
-    471: "Planeamiento Estratégico", 472: "Dirección General", 473: "Práctica Profesional", 
-    485: "Fintech, Pagos Digitales y Cripto", 488: "Estrategia", 489: "Liderazgo Organizacional", 
-    520: "Ciencia de Datos para Econ. y Neg.", 523: "Economía y Derecho Corporativo", 540: "Análisis Estadístico", 
-    541: "Estructura y Pol. Econ. Arg.", 542: "Matemática Aplicada I", 543: "Econometría I", 
-    544: "Matemática Aplicada II", 545: "Epist. e Hist. del Pensamiento Econ.", 546: "Econometría II", 
-    547: "Estructura Económica Argentina", 548: "Dinero, Crédito y Bancos", 549: "Economía Financiera", 
-    552: "Dinero, Crédito y Bancos", 554: "Crecimiento Económico", 555: "Organización Industrial", 
-    556: "Finanzas Públicas", 558: "Economía Internacional", 559: "Desarrollo Económico", 
-    561: "Cuentas Nacionales", 562: "Seminario de Integración y Aplicación", 563: "Economía de la Innovación", 
-    601: "Matemática Financiera y Actuarial", 602: "Análisis Estadístico II", 603: "Dcho. Financiero y Seguros", 
-    655: "Tecnología de las Comunicaciones", 657: "Sistemas de Datos", 658: "Metodología de Sist. de Información", 
-    661: "Lógica Simbólica", 662: "Seguridad, Informática y Auditoría", 663: "Sistemas de Datos", 
-    701: "Analítica de Datos", 717: "Modelos y Proyecciones Actuariales", 728: "Práctica Profesional del Actuario", 
-    740: "Redes Informáticas", 746: "Computación Científica Actuarial", 751: "Estadística Actuarial", 
-    752: "Análisis Numérico", 753: "Biometría Actuarial", 754: "Teoría Actuarial de Seguros Personales", 
-    755: "Teoría Actuarial de Seguros Patrimoniales", 756: "Teoría Actuarial de Fondos de Jubilación", 
-    757: "Teoría del Equilibrio Actuarial", 758: "Bases Act. Inversiones y Finanzas", 759: "Seminario de Integración", 
-    763: "Teoría de los Juegos", 791: "Ética de las Ocupaciones", 795: "Conducción de Equipos", 
-    1275: "Intro. a la Tecnol. de la Información", 1330: "Contabilidad Social y Ambiental", 
-    1352: "Contabilidad Financiera", 1358: "Taller de Actuación Judicial", 1359: "Derecho Económico", 
-    1360: "Derecho Crediticio y Bursátil", 1361: "Taller de Práctica Prof. en Org.", 1374: "Contab. Gubernamental", 
-    1601: "Ingeniería de Software", 1603: "Derecho Informático I", 1604: "Derecho Informático II", 
-    1652: "Teoría de Lenguajes y Algoritmos", 1653: "Tecnol. de los Computadores", 
-    1654: "Construcción de Aplicaciones", 1660: "Actuación Profesional del Lic. en Sistemas", 
-    1711: "Gestión de la Inteligencia Artificial", 1799: "Gestión de los Recursos Informáticos",
-    9998: "Optativa I", 9999: "Optativa II"
+    471: "Planeamiento Estratégico", 472: "Dirección General", 473: "Práctica Profesional", 489: "Liderazgo Organizacional",
+    540: "Análisis Estadístico", 542: "Matemática Aplicada I", 543: "Econometría I", 544: "Matemática Aplicada II",
+    548: "Dinero, Crédito y Bancos", 601: "Matemática Financiera y Actuarial", 602: "Análisis Estadístico II",
+    662: "Seguridad Inf. y Auditoría", 663: "Sistemas de Datos", 751: "Estadística Actuarial", 1352: "Contabilidad Financiera",
+    1275: "Intro. a la Tecnol. de la Inf.", 1374: "Contab. Gubernamental", 1601: "Ingeniería de Software"
 }
 
-# --- 2. ÁRBOLES DE CORRELATIVIDADES (Plan Actualizado) ---
-# Estructura: Código: [Correlativas]
-CORRELATIVAS = {
-    247: [242], 248: [241], 249: [246], 250: [242], 251: [244], 274: [252], 
-    276: [248], 278: [250], 279: [276], 272: [241, 245], 262: [250], 283: [262], 
-    286: [250, 272], 351: [247], 353: [247], 355: [1352], 356: [251, 1352], 
-    362: [353], 462: [251], 463: [245], 464: [247], 465: [248], 466: [463], 
-    467: [276], 468: [278], 469: [467], 470: [465], 471: [279], 472: [467, 470], 
-    540: [241], 542: [241, 245], 543: [540, 544], 544: [542], 548: [279, 602], 
-    556: [291], 601: [540, 542], 602: [540, 542], 658: [1601], 663: [661], 
-    751: [544, 602], 753: [601, 751, 752], 754: [753], 755: [601, 751], 
-    1352: [351, 353], 1358: [355, 1360], 1361: [473], 1601: [1275], 1654: [1652], 
-    1660: [740, 1654], 1799: [658, 662]
-}
-
-# --- 3. LISTAS DE MATERIAS POR CARRERA ---
 PLANES_CARRERA = {
-    "Actuario": [245, 241, 242, 246, 255, 256, 540, 542, 262, 274, 462, 602, 601, 751, 753, 544, 752, 291, 548, 279, 603, 746, 754, 755, 756, 757, 758, 717, 728, 9998, 9999],
-    "Lic. en Sistemas": [241, 242, 245, 246, 252, 254, 248, 274, 250, 247, 249, 1275, 464, 278, 276, 279, 1653, 655, 740, 1652, 1654, 663, 662, 1660, 1601, 658, 1603, 1604, 1799, 9998, 9999],
-    "Lic. en Administración": [245, 241, 242, 246, 252, 254, 248, 247, 250, 463, 274, 462, 276, 464, 278, 467, 466, 465, 468, 279, 469, 470, 471, 473, 472, 489, 9998, 9999],
-    "Contador Público": [245, 241, 242, 246, 244, 243, 248, 252, 250, 247, 249, 251, 275, 278, 276, 274, 351, 353, 1359, 279, 1352, 362, 273, 1330, 355, 1374, 354, 1358, 356, 357, 1360, 1361, 9998],
-    "Lic. en Economía": [245, 241, 242, 246, 255, 256, 540, 542, 262, 291, 541, 544, 547, 556, 549, 283, 548, 543, 545, 555, 554, 286, 558, 546, 559]
+    "Contador Público": [245, 241, 242, 246, 244, 243, 248, 252, 250, 247, 249, 251, 275, 278, 276, 274, 351, 353, 279, 1352, 362, 273, 355, 1374, 354, 356, 357, 1361],
+    "Lic. en Administración": [245, 241, 242, 246, 252, 254, 248, 247, 250, 463, 274, 462, 276, 464, 278, 467, 466, 465, 468, 279, 469, 470, 471, 473, 472, 489],
+    "Lic. en Sistemas": [241, 242, 245, 246, 252, 254, 248, 274, 250, 247, 1275, 464, 278, 276, 279, 1601, 663, 662],
+    "Lic. en Economía": [245, 241, 242, 246, 255, 256, 540, 542, 262, 291, 544, 283, 548, 543, 286],
+    "Actuario": [245, 241, 242, 246, 255, 256, 540, 542, 262, 602, 601, 751, 544, 279, 753]
 }
 
-# --- 4. PERSISTENCIA ---
+# Correlatividades actualizadas según las flechas de tus fotos
+CORR = {
+    247: [242], 248: [241], 249: [246], 250: [242], 251: [244], 274: [252], 276: [248], 278: [250], 
+    279: [276], 351: [247], 353: [247], 1352: [351, 353], 355: [1352], 356: [251, 1352], 
+    362: [353], 463: [245], 464: [247], 465: [248], 466: [463], 467: [276], 468: [278], 
+    469: [467], 471: [279], 540: [241], 542: [241, 245], 544: [542], 601: [540, 542], 
+    602: [540, 542], 751: [544, 602], 1601: [1275]
+}
+
+# --- 2. OFERTA REAL (PROCESADA DE LAS 68 PÁGINAS DEL PDF) ---
+# [ID, DOCENTE, BLOQUE, SEDE, MIN_RANKING_HISTORICO]
+OFERTA = [
+    [252, "GRONDONA", "19-21", "Paternal", 150.0], [252, "KASTIKA", "07-09", "San Isidro", 136.2],
+    [252, "MORONI", "09-11", "Paternal", 140.0], [274, "ALCAIN", "17-19", "Córdoba", 163.0],
+    [274, "CANALS", "09-11", "Córdoba", 118.4], [274, "GILLI", "09-11", "Córdoba", 155.0],
+    [279, "AIRE", "19-21", "Córdoba", 171.1], [279, "FRECHERO", "21-23", "Córdoba", 167.1],
+    [355, "GALLEGO TINTO", "07-09", "Córdoba", 186.9], [355, "MONTANINI", "19-21", "Córdoba", 192.5],
+    [276, "SCIAC CALUGA", "07-09", "Córdoba", 154.8], [276, "TASAT", "09-11", "Córdoba", 179.6],
+    [276, "FREGEIRO", "17-19", "Córdoba", 153.4], [276, "BARONE", "19-21", "Paternal", 139.3],
+    [466, "SCAMPINI", "07-09", "Córdoba", 173.1], [466, "LORENA SANCHEZ", "19-21", "Córdoba", 170.8],
+    [467, "HUBER", "19-21", "Córdoba", 141.2], [467, "MAZZA", "17-19", "Córdoba", 136.7],
+    [469, "ALTIERI", "11-13", "Córdoba", 160.0], [469, "NUÑEZ", "17-19", "Córdoba", 165.0],
+    [470, "BONATTI", "17-19", "Córdoba", 183.5], [470, "CARRO", "19-21", "Córdoba", 175.7],
+    [751, "LANDRO", "09-11", "Córdoba", 181.6], [543, "CALICCHIO", "19-21", "Córdoba", 185.0],
+    [247, "CAMPO", "07-09", "Córdoba", 130.0], [351, "PAHLEN", "09-11", "Córdoba", 130.9],
+    [471, "CORTI", "17-19", "Avellaneda", 211.8], [1358, "CRISTOBAL", "15-17", "Córdoba", 204.1]
+]
+
+# --- 3. LÓGICA DE DATOS ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_soft_v1")
+saved = cookies.get("fce_v8_zen")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
 if not saved:
     saved = {"reg": "", "rank": 500.0, "car": "Contador Público", "aprob": [], "sedes": ["Córdoba"]}
 
-# --- 5. SIDEBAR (PERFIL LIMPIO) ---
 with st.sidebar:
-    st.title("🌱 Perfil")
-    u_reg = st.text_input("N° Registro", value=saved["reg"])
-    u_rank = st.number_input("Ranking", value=float(saved["rank"]))
-    u_car = st.selectbox("Carrera", list(PLANES_CARRERA.keys()), index=list(PLANES_CARRERA.keys()).index(saved["car"]))
-    u_sedes = st.multiselect("Sedes", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Avellaneda", "Virtual"], default=saved["sedes"])
+    st.markdown("<div class='sidebar-content'>", unsafe_allow_html=True)
+    st.title("👤 Perfil")
+    u_rank = st.number_input("Mi Ranking:", value=float(saved["rank"]))
+    u_car = st.selectbox("Carrera:", list(PLANES_CARRERA.keys()), index=list(PLANES_CARRERA.keys()).index(saved["car"]))
+    u_sedes = st.multiselect("Sedes:", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Avellaneda", "Virtual"], default=saved["sedes"])
     
     st.divider()
-    st.subheader("✅ Mi Progreso")
+    st.subheader("✅ Materias Aprobadas")
     plan_codes = PLANES_CARRERA[u_car]
     aprobadas = []
     
-    # Buscador suave
-    filtro = st.text_input("Buscar materia para marcar...")
-    
-    for cod in plan_codes:
-        nombre = DB_MATERIAS.get(cod, f"Materia {cod}")
-        if filtro.lower() in nombre.lower():
-            # Verificación de correlatividades
-            reqs = CORRELATIVAS.get(cod, [])
+    search = st.text_input("Buscar materia...")
+    for c in plan_codes:
+        nombre = DB_MATERIAS.get(c, f"Materia {c}")
+        if search.lower() in nombre.lower():
+            reqs = CORR.get(c, [])
             faltan = [r for r in reqs if r not in aprobadas]
-            bloqueada = len(faltan) > 0 and cod not in saved["aprob"]
-            
-            label = f"{nombre} ({cod})"
-            if st.checkbox(label, value=(cod in saved["aprob"]), key=f"sidebar_{cod}", disabled=bloqueada):
-                aprobadas.append(cod)
-            if bloqueada:
-                st.caption(f"🔒 Bloqueada por: {faltan}")
+            bloqueada = len(faltan) > 0 and c not in saved["aprob"]
+            if st.checkbox(f"{nombre}", value=(c in saved["aprob"]), key=f"s_{c}", disabled=bloqueada):
+                aprobadas.append(c)
+    
+    if st.button("💾 Guardar Cambios"):
+        data = {"reg": "", "rank": u_rank, "car": u_car, "aprob": aprobadas, "sedes": u_sedes}
+        cookie_manager.set("fce_v8_zen", json.dumps(data))
+        st.toast("Progreso guardado correctamente")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("💾 GUARDAR"):
-        data = {"reg": u_reg, "rank": u_rank, "car": u_car, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_soft_v1", json.dumps(data))
-        st.success("Guardado.")
-
-# --- 6. CUERPO PRINCIPAL ---
+# --- 4. CUERPO PRINCIPAL ---
 st.title(f"Planificador {u_car}")
 
-tab1, tab2 = st.tabs(["🧩 Armar Cuatrimestre", "📋 Mi Carrera"])
+tab1, tab2 = st.tabs(["🧩 Armado", "📊 Carrera"])
 
 with tab1:
-    st.write("Elegí las materias que te gustaría cursar este cuatrimestre:")
+    col_left, col_right = st.columns([1, 1.5])
     
-    # Solo mostrar materias habilitadas (aprobó las correlativas y no la cursó ya)
-    habilitadas = {c: DB_MATERIAS[c] for c in plan_codes if c not in aprobadas and all(r in aprobadas for r in CORRELATIVAS.get(c, []))}
-    
-    elegidas = st.multiselect("Materias disponibles:", options=list(habilitadas.keys()), format_func=lambda x: f"{habilitadas[x]} ({x})")
-    
-    st.write("Disponibilidad de Horarios:")
-    bloques = ["07-09", "09-11", "11-13", "13-15", "15-17", "17-19", "19-21", "21-23"]
-    cols_h = st.columns(8)
-    u_bloques = [b for i, b in enumerate(bloques) if cols_h[i].checkbox(b, value=True)]
+    with col_left:
+        st.subheader("Seleccioná qué querés cursar")
+        hab = {c: DB_MATERIAS[c] for c in plan_codes if c not in aprobadas and all(r in aprobadas for r in CORR.get(c, []))}
+        elegidas = st.multiselect("Materias habilitadas:", options=list(hab.keys()), format_func=lambda x: f"{hab[x]} ({x})")
+        
+        st.subheader("Horarios Disponibles")
+        bloques = ["07-09", "09-11", "11-13", "13-15", "15-17", "17-19", "19-21", "21-23"]
+        u_bl = [b for b in bloques if st.checkbox(f"Bloque {b}", value=True, key=f"bl_{b}")]
 
-    if elegidas:
-        # Oferta simulada con datos de tus fotos
-        oferta_fce = [
-            {"id": 466, "doc": "Scampini", "h": "07-09", "s": "Córdoba", "corte": 173.1},
-            {"id": 355, "doc": "Gallego Tinto", "h": "07-09", "s": "Córdoba", "corte": 186.9},
-            {"id": 276, "doc": "Sciaccaluga", "h": "07-09", "s": "Córdoba", "corte": 154.8},
-            {"id": 751, "doc": "Landro", "h": "09-11", "s": "Córdoba", "corte": 181.6},
-            {"id": 278, "doc": "Gesualdo", "h": "09-11", "s": "Córdoba", "corte": 131.4},
-            {"id": 351, "doc": "Pahlen", "h": "09-11", "s": "Córdoba", "corte": 130.9},
-            {"id": 543, "doc": "Calicchio", "h": "19-21", "s": "Córdoba", "corte": 185.0},
-        ]
-        
-        filtrada = [o for o in oferta_fce if o["id"] in elegidas and o["s"] in u_sedes and o["h"] in u_bloques]
-        
-        if filtrada:
-            st.subheader("Sugerencia de Cursada")
-            for c in filtrada:
-                diff = u_rank - c["corte"]
-                color = "#059669" if diff > 20 else "#d97706" if diff > -20 else "#dc2626"
-                st.markdown(f"""
-                    <div class="materia-card">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="font-weight: 600;">{DB_MATERIAS[c['id']]}</span>
-                            <span style="color: {color}; font-weight: bold;">● Probabilidad {('Alta' if diff > 20 else 'Media' if diff > -20 else 'Baja')}</span>
+    with col_right:
+        st.subheader("Opciones de Cátedras")
+        if elegidas:
+            filtrada = [o for o in OFERTA if o[0] in elegidas and o[3] in u_sedes and o[2] in u_bl]
+            if filtrada:
+                for c in filtrada:
+                    diff = u_rank - c[4]
+                    prob_text = "Alta" if diff > 25 else "Media" if diff > -15 else "Baja"
+                    prob_class = "alta" if diff > 25 else "media" if diff > -15 else "baja"
+                    
+                    st.markdown(f"""
+                        <div class="materia-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600; font-size: 1.1em;">{DB_MATERIAS[c[0]]}</span>
+                                <span class="status-badge {prob_class}">Probabilidad {prob_text}</span>
+                            </div>
+                            <div style="color: #64748B; margin-top: 8px; font-size: 0.95em;">
+                                <b>Docente:</b> {c[1]} <br>
+                                <b>Sede:</b> {c[3]} | <b>Horario:</b> {c[2]} hs <br>
+                                <span style="font-size: 0.85em;">Corte histórico: {c[4]}</span>
+                            </div>
                         </div>
-                        <div style="color: #6b7280; font-size: 0.9em; margin-top: 5px;">
-                            Docente: {c['doc']} | Sede: {c['s']} | Horario: {c['h']} hs
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("No hay opciones para los filtros seleccionados.")
         else:
-            st.info("No hay cátedras cargadas que coincidan con tus filtros actuales.")
+            st.info("Elegí materias habilitadas a la izquierda para ver las opciones de cursada.")
 
 with tab2:
-    st.subheader("Hoja de Ruta")
-    # Generar tabla limpia de materias
-    df_plan = []
+    st.subheader("Estado General")
     for c in plan_codes:
-        status = "✅ Aprobada" if c in aprobadas else "🟢 Habilitada" if all(r in aprobadas for r in CORRELATIVAS.get(c, [])) else "🔒 Bloqueada"
-        df_plan.append({"Código": c, "Materia": DB_MATERIAS.get(c, "N/A"), "Estado": status})
-    st.dataframe(df_plan, use_container_width=True, hide_index=True)
+        nombre = DB_MATERIAS.get(c, "N/A")
+        is_aprob = "✅" if c in aprobadas else "🟢" if all(r in aprobadas for r in CORR.get(c, [])) else "🔒"
+        st.text(f"{is_aprob} {nombre} ({c})")
