@@ -2,126 +2,152 @@ import streamlit as st
 import pandas as pd
 
 # --- CONFIGURACIÓN ---
-st.set_page_config(page_title="Planificador FCE UBA", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Planificador FCE UBA", layout="wide")
 
-# --- DATA: PLANES DE ESTUDIO (Extraído de tus fotos) ---
-# Definimos el Primer Tramo (Común a casi todas)
-primer_tramo_ids = [241, 242, 243, 244, 245, 246]
-materias_data = {
-    241: {"nombre": "Análisis Matemático I", "tramo": 1},
-    242: {"nombre": "Economía", "tramo": 1},
-    243: {"nombre": "Sociología", "tramo": 1},
-    244: {"nombre": "Metodología de las Cs. Soc.", "tramo": 1},
-    245: {"nombre": "Álgebra", "tramo": 1},
-    246: {"nombre": "Hist. Econ. y Soc. Gral.", "tramo": 1},
-    # Segundo Tramo - Contador
-    248: {"nombre": "Estadística I", "tramo": 2, "corr": [241], "carrera": "Contador"},
-    247: {"nombre": "Teoría Contable", "tramo": 2, "corr": [242], "carrera": "Contador"},
-    250: {"nombre": "Microeconomía I", "tramo": 2, "corr": [242], "carrera": "Contador"},
-    249: {"nombre": "Hist. Econ. y Soc. Arg.", "tramo": 2, "corr": [246], "carrera": "Contador"},
-    251: {"nombre": "Instituciones de Dcho. Público", "tramo": 2, "corr": [244], "carrera": "Contador"},
-    252: {"nombre": "Administración General", "tramo": 2, "corr": [243], "carrera": "Contador"},
-    276: {"nombre": "Cálculo Financiero", "tramo": 2, "corr": [248], "carrera": "Contador"},
-    351: {"nombre": "Sistemas Contables", "tramo": 2, "corr": [247], "carrera": "Contador"},
-    353: {"nombre": "Sistemas de Costos", "tramo": 2, "corr": [247], "carrera": "Contador"},
-    274: {"nombre": "Sistemas Administrativos", "tramo": 2, "corr": [252], "carrera": "Contador"},
-    279: {"nombre": "Adm. Financiera", "tramo": 2, "corr": [276], "carrera": "Contador"},
+# --- BASE DE DATOS DE MATERIAS POR CARRERA ---
+primer_tramo = {
+    241: "Análisis Matemático I",
+    242: "Economía",
+    243: "Sociología",
+    244: "Metodología de las Cs. Soc.",
+    245: "Álgebra",
+    246: "Hist. Econ. y Soc. Gral."
 }
 
-# --- DATA: OFERTA ACADÉMICA (Extraído de tus capturas del PDF) ---
-oferta_real = [
-    # Administracion General (252)
-    {"id": 252, "curso": "Grondona (1)", "dias": "Lu/Ju", "horario": "19-21", "sede": "Paternal"},
-    {"id": 252, "curso": "Kastika (8)", "dias": "Lu/Ju", "horario": "07-09", "sede": "San Isidro"},
-    {"id": 252, "curso": "Moroni (11)", "dias": "Lu/Ju", "horario": "07-09", "sede": "Paternal"},
-    {"id": 252, "curso": "Kastika (98)", "dias": "Ma", "horario": "13-15", "sede": "Virtual"},
-    # Sistemas Administrativos (274)
-    {"id": 274, "curso": "Alcain (1)", "dias": "Lu/Ju", "horario": "17-19", "sede": "Cordoba"},
-    {"id": 274, "curso": "Chahin (14)", "dias": "Lu/Ju", "horario": "21-23", "sede": "Cordoba"},
-    {"id": 274, "curso": "Gilli (18)", "dias": "Lu/Ju", "horario": "09-11", "sede": "Cordoba"},
-    # Administracion Financiera (279)
-    {"id": 279, "curso": "Aire (8)", "dias": "Ma/Vi/Sa", "horario": "19-21", "sede": "Cordoba"},
-    {"id": 279, "curso": "Fernandez (13)", "dias": "Ma/Vi/Sa", "horario": "17-19", "sede": "Cordoba"},
+planes = {
+    "Contador Público": {
+        248: {"nombre": "Estadística I", "corr": [241]},
+        247: {"nombre": "Teoría Contable", "corr": [242]},
+        250: {"nombre": "Microeconomía I", "corr": [242]},
+        252: {"nombre": "Administración General", "corr": [243]},
+        351: {"nombre": "Sistemas Contables", "corr": [247]},
+        276: {"nombre": "Cálculo Financiero", "corr": [248]},
+        274: {"nombre": "Sistemas Administrativos", "corr": [252]},
+    },
+    "Lic. en Administración": {
+        248: {"nombre": "Estadística I", "corr": [241]},
+        247: {"nombre": "Teoría Contable", "corr": [242]},
+        250: {"nombre": "Microeconomía I", "corr": [242]},
+        252: {"nombre": "Administración General", "corr": [243]},
+        463: {"nombre": "Gestión de Tec. Digitales", "corr": [245]},
+        278: {"nombre": "Macroeconomía y Pol. Econ.", "corr": [250]},
+    },
+    "Lic. en Economía": {
+        248: {"nombre": "Estadística I", "corr": [241]},
+        250: {"nombre": "Microeconomía I", "corr": [242]},
+        272: {"nombre": "Análisis Matemático II", "corr": [241, 245]},
+        262: {"nombre": "Macroeconomía I", "corr": [250]},
+    },
+    "Actuario (Admin/Econ)": {
+        248: {"nombre": "Estadística I", "corr": [241]},
+        276: {"nombre": "Cálculo Financiero", "corr": [248]},
+        277: {"nombre": "Estadística II", "corr": [248]},
+        601: {"nombre": "Mat. Financiera y Actuarial", "corr": [276]},
+    },
+    "Lic. en Sistemas": {
+        247: {"nombre": "Teoría Contable", "corr": [242]},
+        1275: {"nombre": "Intro a la Tec. de la Inf. y Com.", "corr": [245]},
+        248: {"nombre": "Estadística I", "corr": [241]},
+        274: {"nombre": "Sistemas Administrativos", "corr": [252]},
+    }
+}
+
+# --- OFERTA ACADÉMICA (Horarios de las fotos) ---
+oferta_simulada = [
+    {"id": 252, "curso": "Grondona (1)", "dias": "Lu/Ju", "inicio": 19, "fin": 21, "sede": "Paternal"},
+    {"id": 252, "curso": "Romero (3)", "dias": "Lu/Ju", "inicio": 9, "fin": 11, "sede": "Pilar"},
+    {"id": 252, "curso": "Kastika (8)", "dias": "Lu/Ju", "inicio": 7, "fin": 9, "sede": "San Isidro"},
+    {"id": 252, "curso": "Kastika (9)", "dias": "Ma/Vi", "inicio": 13, "fin": 15, "sede": "San Isidro"},
+    {"id": 274, "curso": "Binetti (1)", "dias": "Lu/Ju", "inicio": 17, "fin": 19, "sede": "Cordoba"},
+    {"id": 274, "curso": "Alcain (2)", "dias": "Ma/Vi", "inicio": 19, "fin": 21, "sede": "Cordoba"},
+    {"id": 274, "curso": "Gilli (18)", "dias": "Lu/Ju", "inicio": 9, "fin": 11, "sede": "Cordoba"},
+    {"id": 250, "curso": "Apella", "dias": "Ma/Vi", "inicio": 7, "fin": 9, "sede": "Cordoba"},
+    {"id": 272, "curso": "Aromi", "dias": "Lu/Ju", "inicio": 11, "fin": 13, "sede": "Cordoba"},
 ]
 
-# --- INTERFAZ ---
-st.sidebar.image("https://www.economicas.uba.ar/wp-content/uploads/2016/03/logo-fce-300x127.png", width=150)
-st.title("🛡️ Asistente de Inscripción FCE UBA")
+# --- LÓGICA DE INTERFAZ ---
+st.title("🎓 Planificador Académico FCE UBA")
 
-carrera = st.sidebar.selectbox("Seleccioná tu carrera:", ["Contador Público", "Lic. en Administración", "Lic. en Sistemas"])
+carrera_sel = st.sidebar.selectbox("Seleccioná tu Carrera:", list(planes.keys()))
 
-st.sidebar.subheader("Paso 1: ¿Qué ya aprobaste?")
-aprobadas_codes = []
-# Primer tramo
-with st.sidebar.expander("Primer Tramo (CBC/FCE)"):
-    for code in primer_tramo_ids:
-        if st.checkbox(f"{materias_data[code]['nombre']} ({code})", key=f"check_{code}"):
-            aprobadas_codes.append(code)
+st.sidebar.markdown("---")
+st.sidebar.subheader("1. Materias Aprobadas")
 
-primer_tramo_completo = all(c in aprobadas_codes for c in primer_tramo_ids)
+aprobadas = []
+with st.sidebar.expander("Primer Tramo (Común)", expanded=False):
+    for cod, nom in primer_tramo.items():
+        if st.checkbox(f"{nom} ({cod})", key=f"p_{cod}"):
+            aprobadas.append(cod)
 
-# Segundo tramo
+primer_tramo_ok = all(c in aprobadas for c in primer_tramo.keys())
+
 with st.sidebar.expander("Segundo Tramo / Profesional"):
-    if not primer_tramo_completo:
-        st.warning("Debés completar el 1er tramo para marcar estas.")
-    for code, info in materias_data.items():
-        if info["tramo"] == 2:
-            if st.checkbox(f"{info['nombre']} ({code})", key=f"check_{code}", disabled=not primer_tramo_completo):
-                aprobadas_codes.append(code)
+    materias_plan = planes[carrera_sel]
+    for cod, info in materias_plan.items():
+        if st.checkbox(f"{info['nombre']} ({cod})", key=f"s_{cod}", disabled=not primer_tramo_ok):
+            aprobadas.append(cod)
 
-# --- FILTROS DE PREFERENCIA ---
-st.sidebar.subheader("Paso 2: Preferencias de Cursada")
-sedes = st.sidebar.multiselect("Sedes preferidas:", ["Cordoba", "Paternal", "San Isidro", "Pilar", "Avellaneda", "Virtual"], default=["Cordoba", "Virtual"])
-dias_libres = st.sidebar.multiselect("Días que NO podés cursar:", ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"])
+st.sidebar.markdown("---")
+st.sidebar.subheader("2. Preferencias de Horario")
 
-# --- RESULTADOS ---
+# Filtro por banda horaria
+turnos = st.sidebar.multiselect("Banda horaria:", ["Mañana (7-13)", "Tarde (13-17)", "Noche (17-23)"], default=["Mañana (7-13)", "Tarde (13-17)", "Noche (17-23)"])
+
+# Filtro por rango exacto
+rango_h = st.sidebar.slider("Rango de horas que podés cursar:", 7, 23, (7, 23))
+
+st.sidebar.subheader("3. Otras Preferencias")
+sedes_sel = st.sidebar.multiselect("Sedes:", ["Cordoba", "Paternal", "San Isidro", "Pilar", "Avellaneda", "Virtual"], default=["Cordoba", "Virtual", "Paternal"])
+
+# --- PROCESAMIENTO DE HABILITADAS ---
+habilitadas_ids = []
+if not primer_tramo_ok:
+    for cod, nom in primer_tramo.items():
+        if cod not in aprobadas: habilitadas_ids.append(cod)
+else:
+    for cod, info in materias_plan.items():
+        if cod not in aprobadas:
+            if all(c in aprobadas for c in info["corr"]):
+                habilitadas_ids.append(cod)
+
+# --- FILTRADO DE CURSOS ---
+cursos_finales = []
+for c in oferta_simulada:
+    if c["id"] in habilitadas_ids and c["sede"] in sedes_sel:
+        # 1. Filtro de Rango Exacto
+        if c["inicio"] >= rango_h[0] and c["fin"] <= rango_h[1]:
+            
+            # 2. Filtro de Turnos (Mañana, Tarde, Noche)
+            pasa_turno = False
+            if "Mañana (7-13)" in turnos and c["fin"] <= 13: pasa_turno = True
+            if "Tarde (13-17)" in turnos and c["inicio"] >= 13 and c["fin"] <= 17: pasa_turno = True
+            if "Noche (17-23)" in turnos and c["inicio"] >= 17: pasa_turno = True
+            
+            if pasa_turno:
+                cursos_finales.append(c)
+
+# --- VISUALIZACIÓN ---
+st.header(f"Planificación para {carrera_sel}")
+
 col1, col2 = st.columns([1, 2])
 
 with col1:
-    st.header("Materias Habilitadas")
-    habilitadas = []
-    
-    for code, info in materias_data.items():
-        if code in aprobadas_codes:
-            continue
-            
-        # Lógica de correlatividades
-        if info["tramo"] == 2 and not primer_tramo_completo:
-            continue
-            
-        if "corr" in info:
-            if all(c in aprobadas_codes for c in info["corr"]):
-                habilitadas.append(code)
-                st.success(f"**{info['nombre']}** ({code})")
-        elif info["tramo"] == 1:
-            habilitadas.append(code)
-            st.info(f"**{info['nombre']}** ({code})")
+    st.subheader("📝 Materias Habilitadas")
+    if not habilitadas_ids:
+        st.info("¡Felicitaciones! No tenés materias pendientes registradas.")
+    for h in habilitadas_ids:
+        nom = primer_tramo.get(h) or materias_plan.get(h, {}).get("nombre")
+        st.write(f"✅ {nom} ({h})")
 
 with col2:
-    st.header("Cursos Disponibles")
-    st.caption("Filtrados por tus correlativas y sedes")
-    
-    cursos_finales = []
-    for c in oferta_real:
-        if c["id"] in habilitadas and c["sede"] in sedes:
-            # Filtro básico de días libres
-            pasa_filtro_dias = True
-            for d in dias_libres:
-                if d in c["dias"]:
-                    pasa_filtro_dias = False
-            
-            if pasa_filtro_dias:
-                cursos_finales.append({
-                    "Materia": materias_data[c["id"]]["nombre"],
-                    "Cátedra (Curso)": c["curso"],
-                    "Días": c["dias"],
-                    "Horario": c["horario"],
-                    "Sede": c["sede"]
-                })
-    
+    st.subheader("🕒 Cursos que coinciden con tus horarios")
     if cursos_finales:
-        st.table(pd.DataFrame(cursos_finales))
+        df = pd.DataFrame(cursos_finales)
+        df['Materia'] = df['id'].apply(lambda x: primer_tramo.get(x) or materias_plan.get(x, {}).get('nombre'))
+        df['Horario'] = df.apply(lambda x: f"{x['inicio']}:00 a {x['fin']}:00 hs", axis=1)
+        st.table(df[['Materia', 'curso', 'dias', 'Horario', 'sede']])
     else:
-        st.warning("No hay cursos que coincidan con tus filtros o aún no habilitaste materias del tramo profesional.")
+        st.warning("No hay cursos que coincidan con tus filtros de horario o sede.")
 
-st.info("💡 Consejo: Esta app te ayuda a planificar, pero recordá siempre verificar en el sistema de inscripciones (MiEcon) antes de confirmar.")
+st.markdown("---")
+st.caption("FCE UBA - Asistente Académico")
