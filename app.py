@@ -42,54 +42,84 @@ PLAN_ECON = {
         562: ["Seminario Economía", [543, 558]]
     },
     "Optativas": {
-        520: ["Ciencia Datos", [543]], 521: ["Econ. Austriaca", [242]], 763: ["Teoría Juegos", [291]],
-        563: ["Innovación", [242]], 1721: ["Econ. Comportamiento", [291]]
+        520: ["Ciencia Datos", [543]], 521: ["Econ. Austriaca", [242]], 523: ["Econ. y Dcho Corp.", [256]],
+        563: ["Innovación", [242]], 763: ["Teoría Juegos", [291]], 1721: ["Econ. Comportamiento", [291]]
     }
 }
 
-# --- 2. OFERTA ACADÉMICA TOTAL (Extraída del PDF 2026) ---
+# --- 2. OFERTA ACADÉMICA COMPLETA (PROCESADA DE TU PDF) ---
 # [Cod, Cátedra, Profesor, Días, Horario, Sede, Ranking_Corte, Modalidad, Día_Virtual]
 OFERTA_TOTAL = [
+    # Macro I (262)
+    [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma/Mi/Vi", "07-09", "Córdoba", 144.6, "P", ""],
+    [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu/Mi/Ju", "09-11", "Córdoba", 140.0, "P", ""],
+    [262, "ZACK GUIDO", "Michelena Gabriel", "Lu/Mi/Ju", "09-11", "Avellaneda", 118.0, "P", ""],
+    [262, "ZACK GUIDO", "Cerdan Manuel", "Lu/Mi/Ju", "07-09", "Paternal", 130.0, "P", ""],
+    [262, "ZACK GUIDO", "Favata Federico", "Lu/Ju", "11-13", "San Isidro", 132.7, "P", "Lunes presencial 09-13"],
+    # Macro II (283)
+    [283, "ELOSEGUI", "Elosegui Pedro", "Ma/Vi/Sa", "17-19", "Córdoba", 170.0, "P", "Sábado virtual (11-13)"],
+    [283, "RAPETTI", "Libman Emiliano", "Lu/Mi/Ju", "07-09", "Córdoba", 165.0, "P", ""],
+    [283, "RAPETTI", "Rapetti Martin", "Ma/Vi/Sa", "11-13", "Córdoba", 169.5, "P", ""],
+    [283, "RAPETTI", "Zack Guido", "Lu/Mi/Ju", "17-19", "Córdoba", 164.3, "P", ""],
+    [283, "RAPETTI", "Pierri Damian", "Lu/Mi/Ju", "19-21", "Córdoba", 158.4, "P", ""],
+    # Micro II (286)
+    [286, "AROMI", "Pascuini Paulo", "Lu/Mi/Ju", "09-11", "Córdoba", 156.5, "P", ""],
+    [286, "AROMI", "Aromi Jose", "Lu/Mi/Ju", "11-13", "Córdoba", 156.0, "P", ""],
+    [286, "AROMI", "Ojeda Maria", "Lu/Mi/Ju", "17-19", "Córdoba", 166.0, "P", ""],
+    [286, "AROMI", "Acosta Jorge", "Lu/Mi/Ju", "17-19", "Córdoba", 166.7, "P", ""],
+    [286, "FERRARO", "Rigoni Camila", "Ma/Vi/Sa", "09-11", "Córdoba", 160.0, "P", "Sábado virtual (11-13)"],
+    # Micro p/ Econ (291)
+    [291, "APELLA", "Mercatante Juan", "Lu/Mi/Ju", "17-19", "Córdoba", 148.4, "P", ""],
+    [291, "APELLA", "Scheimberg Seb.", "Ma/Vi/Sa", "17-19", "Córdoba", 148.5, "P", "Sábado virtual (09-11)"],
+    [291, "APELLA", "Apella Ignacio", "Lu/Mi/Ju", "19-21", "Córdoba", 140.0, "P", ""],
+    [291, "PETRECOLLA", "Petrecolla Diego", "Lu/Mi/Ju", "09-11", "Córdoba", 145.0, "P", ""],
+    [291, "PETRECOLLA", "Jack Pablo", "Lu/Mi/Ju", "09-11", "Córdoba", 145.0, "V", "Comisión Virtual"],
+    [291, "PETRECOLLA", "Fajfar Pablo", "Lu/Mi/Ju", "11-13", "Córdoba", 148.0, "P", ""],
+    # Análisis Estadístico (540)
+    [540, "BIANCO", "Larra Matias", "Lu/Mi/Ju", "09-11", "Avellaneda", 147.2, "P", ""],
+    [540, "BIANCO", "Salaberry Natalia", "Ma/Mi/Vi", "09-11", "Córdoba", 150.0, "P", ""],
+    [540, "BIANCO", "Serebrisky Juan", "Ma/Mi/Vi", "09-11", "Paternal", 145.0, "P", ""],
+    [540, "BIANCO", "Comisión 99", "Miércoles", "17-19", "Virtual", 147.0, "V", "Virtual 100%"],
+    # Hist Econ Arg (541)
+    [541, "BELINI", "Belini Claudio", "Ma/Vi", "09-11", "Paternal", 141.0, "P", ""],
+    [541, "BELINI", "Dethiou Cecilia", "Ma/Vi", "07-09", "San Isidro", 130.0, "P", ""],
+    [541, "ROUGIER", "Caravaca Jimena", "Ma/Vi", "09-11", "Avellaneda", 140.0, "P", ""],
+    [541, "ROUGIER", "Kulfas / Salles", "Ma/Vi", "09-11", "Córdoba", 145.0, "P", ""],
+    # Matemática Aplicada II (544)
+    [544, "BIANCO", "Tarullo Eduardo", "Lu/Mi/Ju", "09-11", "Córdoba", 137.0, "P", ""],
+    [544, "GARCIA FRONTI", "Morrone Rita", "Lu/Mi/Ju", "07-09", "Córdoba", 135.0, "P", ""],
+    [544, "ZORZOLI", "Fajfar Pablo", "Lu/Mi/Ju", "07-09", "Córdoba", 128.1, "P", ""],
     # Epistemología (545)
     [545, "HABERFELD", "Haberfeld Leandro", "Ma/Vi", "09-11", "Córdoba", 140.0, "P", ""],
     [545, "HABERFELD", "Arana Mariano", "Lu/Ju", "17-19", "Córdoba", 135.0, "P", ""],
-    [545, "WEISMAN", "Berneman Nicolas", "Lu/Ju", "11-13", "Córdoba", 130.0, "P", ""],
     [545, "WEISMAN", "Weisman Diego", "Ma/Vi", "11-13", "Córdoba", 138.0, "P", ""],
     [545, "WEISMAN", "Calderon Manuel", "Lu/Ju", "19-21", "Córdoba", 134.5, "P", ""],
-    
     # Econometría II (546)
     [546, "BRUFMAN", "Brufman / Trajtenberg", "Lu/Mi/Ju", "09-11", "Córdoba", 185.0, "P", ""],
     [546, "GONZALEZ MIRTA", "Gonzalez Mirta", "Lu/Mi/Ju", "09-11", "Córdoba", 175.0, "P", ""],
     [546, "MONTES ROJAS", "Corfield Kevin", "Lu/Mi/Ju", "11-13", "Córdoba", 170.0, "P", ""],
-    [546, "MONTES ROJAS", "Bertholet Nicolas", "Ma/Vi/Sa", "17-19", "Córdoba", 165.0, "P", ""],
-    
+    # Estructura (547)
+    [547, "MAURIZIO", "Maurizio / Kulfas", "Lu/Ju", "09-11", "Córdoba", 153.5, "P", "Jueves Virtual"],
+    # Dinero y Bancos (548)
+    [548, "KATZ", "Katz Sebastian", "Ma/Vi", "09-11", "Córdoba", 177.4, "P", ""],
+    [548, "LORENZO", "Lorenzo Guido", "Ma/Vi", "17-19", "Córdoba", 188.9, "P", ""],
     # Desarrollo Económico (559)
     [559, "LOPEZ ANDRES", "Ronconi Lucas", "Lu/Ju", "09-11", "Córdoba", 175.7, "P", ""],
-    [559, "LOPEZ ANDRES", "Gonzalez Juan Pablo", "Ma/Vi", "17-19", "Córdoba", 170.0, "P", ""],
-    [559, "LOPEZ ANDRES", "Lopez Andres Flavio", "Lu/Ju", "19-21", "Córdoba", 168.0, "P", ""],
-    [559, "LOPEZ ANDRES", "Comisión 99", "Jueves", "09-11", "Virtual", 160.0, "V", "Jueves"],
-
+    [559, "LOPEZ ANDRES", "Lopez Andres", "Lu/Ju", "19-21", "Córdoba", 168.0, "P", ""],
     # Internacional (558)
-    [558, "HALLAK", "Bernini Federico", "Lu/Ju", "09-11", "Córdoba", 193.4, "P", ""],
-    [558, "HALLAK", "Hallak Juan Carlos", "Lu/Ju", "11-13", "Córdoba", 188.0, "P", ""],
-    [558, "HALLAK", "Soltz Hernan", "Lu/Ju", "19-21", "Córdoba", 175.0, "P", ""],
-
-    # Macro I (262)
-    [262, "DPTO. ECONOMIA", "Pastor Joaquin", "Ma/Mi/Vi", "07-09", "Córdoba", 144.6, "P", ""],
-    [262, "DPTO. ECONOMIA", "Krysa Ariel", "Lu/Mi/Ju", "09-11", "Córdoba", 140.0, "P", ""],
-    [262, "ZACK GUIDO", "Michelena Gabriel", "Lu/Mi/Ju", "09-11", "Avellaneda", 118.0, "P", ""],
-    
-    # Micro p/ Econ (291)
-    [291, "APELLA", "Mercatante Juan", "Lu/Mi/Ju", "17-19", "Córdoba", 148.4, "P", ""],
-    [291, "PETRECOLLA", "Jack Pablo", "Lu/Mi/Ju", "09-11", "Córdoba", 145.0, "P", "Miércoles (Virtual)"],
-    
-    # Estructura (547)
-    [547, "MAURIZIO", "Maurizio / Kulfas", "Lu/Ju", "09-11", "Córdoba", 153.5, "P", "Jueves (Virtual)"],
+    [558, "HALLAK", "Hallak Juan Carlos", "Lu/Ju", "11-13", "Córdoba", 185.0, "P", ""],
+    [558, "ALBORNOZ", "Albornoz Crespo", "Lu/Ju", "17-19", "Córdoba", 193.4, "P", ""],
+    # Finanzas Públicas (556)
+    [556, "CURCIO", "Curcio Javier", "Ma/Vi", "17-19", "Córdoba", 175.7, "P", ""],
+    # Optativas
+    [520, "MASTELLI", "Mastelli Franco", "Lu/Ju", "19-21", "Córdoba", 221.9, "P", ""],
+    [763, "FAJFAR", "Fajfar Pablo", "Ma/Vi", "09-11", "Virtual", 170.5, "V", "Virtual"],
+    [563, "ARZA", "Arza Valeria", "Lunes", "09-11", "Virtual", 86.7, "V", "Virtual"]
 ]
 
 # --- 3. PERSISTENCIA ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_econ_v_final_full_v2")
+saved = cookies.get("fce_econ_v_final_full_all")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
@@ -98,7 +128,7 @@ if not saved:
 
 # --- 4. SIDEBAR ---
 with st.sidebar:
-    st.title("👤 Mi Perfil")
+    st.title("👤 Perfil")
     u_reg = st.text_input("N° Registro:", value=saved["reg"])
     u_rank = st.number_input("Mi Ranking:", value=float(saved["rank"]))
     u_sedes = st.multiselect("Sedes:", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Avellaneda", "Virtual"], default=saved["sedes"])
@@ -110,11 +140,12 @@ with st.sidebar:
         for cod, nom in PLAN_ECON["Primer Tramo"].items():
             if st.checkbox(nom, value=(cod in saved["aprob"]), key=f"p_{cod}"): aprobadas.append(cod)
     cbc_ok = all(c in aprobadas for c in PLAN_ECON["Primer Tramo"].keys())
-    with st.expander("2. Ciclo Profesional"):
+    with st.expander("2. Ciclo Profesional", expanded=cbc_ok):
         for cod, info in PLAN_ECON["Ciclo Profesional"].items():
             faltan = [r for r in info[1] if r not in aprobadas]
             bloq = (len(faltan) > 0 or not cbc_ok) and cod not in saved["aprob"]
             if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"s_{cod}", disabled=bloq): aprobadas.append(cod)
+            if bloq: st.caption(f"🔒 Falta: {faltan if cbc_ok else 'CBC'}")
     with st.expander("3. Optativas"):
         for cod, info in PLAN_ECON["Optativas"].items():
             faltan = [r for r in info[1] if r not in aprobadas]
@@ -123,8 +154,8 @@ with st.sidebar:
 
     if st.button("💾 GUARDAR"):
         data = {"reg": u_reg, "rank": u_rank, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_econ_v_final_full_v2", json.dumps(data))
-        st.success("Guardado.")
+        cookie_manager.set("fce_econ_v_final_full_all", json.dumps(data))
+        st.success("¡Datos guardados!")
 
 # --- 5. LÓGICA DE FILTRADO ---
 total_mats_names = {**PLAN_ECON["Primer Tramo"], **{k:v[0] for k,v in PLAN_ECON["Ciclo Profesional"].items()}, **{k:v[0] for k,v in PLAN_ECON["Optativas"].items()}}
@@ -174,7 +205,6 @@ with tab_suggest:
 
         validos = find_valid_combos(elegidas)
         if not validos:
-            # Lógica de subsets si hay choques
             for i in range(len(elegidas)-1, 0, -1):
                 subsets = []
                 for sub in combinations(elegidas, i):
@@ -191,7 +221,6 @@ with tab_suggest:
                     badge = "badge-v" if c[7] == "V" else "badge-p"
                     prob = "ALTA" if u_rank > c[6] else "MEDIA" if u_rank > c[6]-15 else "BAJA"
                     color = "#059669" if prob == "ALTA" else "#D97706" if prob == "MEDIA" else "#DC2626"
-                    
                     with cols[idx]:
                         st.markdown(f"""
                             <div class="materia-card">
@@ -199,7 +228,7 @@ with tab_suggest:
                                 <div style="font-size:0.8em; color:#64748B; font-weight:700;">CÁTEDRA: {c[1]}</div>
                                 <div style="font-weight:600; font-size:1.1em; margin-bottom:5px;">{total_mats_names[c[0]]}</div>
                                 <div style="font-size:0.9em; color:#475569;">Prof: {c[2]}</div>
-                                <div style="margin-top:10px; font-size:0.85em;">📅 {c[3]} | ⏰ {c[4]} hs</div>
+                                <div style="margin-top:10px; font-size:0.85em;">📅 {c[3]} | ⏰ {c[2]} hs</div>
                                 <div style="font-size:0.85em;">📍 {c[5]}</div>
                                 {f'<div class="virt-day">💻 Día Virtual: {c[8]}</div>' if c[8] else ''}
                                 <hr style="border:0.5px solid #eee">
@@ -207,3 +236,4 @@ with tab_suggest:
                             </div>
                         """, unsafe_allow_html=True)
         else: st.error("No hay oferta cargada para estas materias.")
+    else: st.info("Seleccioná materias en la pestaña anterior.")
