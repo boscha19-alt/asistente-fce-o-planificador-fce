@@ -2,34 +2,33 @@ import streamlit as st
 import pandas as pd
 import extra_streamlit_components as stx
 import json
-from itertools import product
+from itertools import combinations, product
 
 # --- CONFIGURACIÓN ESTÉTICA ---
-st.set_page_config(page_title="Planificador Economía UBA", layout="wide")
+st.set_page_config(page_title="Inscripción Economía UBA", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #F5F5F4; color: #444; }
-    .stApp { background-color: #F5F5F4; }
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #F8F9FA; color: #334155; }
+    .stApp { background-color: #F8F9FA; }
     .materia-card { 
-        background: white; padding: 20px; border-radius: 12px; 
-        border: 1px solid #E7E5E4; margin-bottom: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        background: white; padding: 18px; border-radius: 12px; 
+        border: 1px solid #E2E8F0; margin-bottom: 12px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
-    .opcion-header { 
-        background-color: #292524; color: white; padding: 10px 20px; 
-        border-radius: 8px; margin-top: 20px; font-weight: 500;
+    .opcion-title { 
+        color: #1E293B; font-size: 1.4em; font-weight: 600; 
+        border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; margin-top: 30px;
     }
-    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7em; font-weight: 700; text-transform: uppercase; }
-    .badge-p { background-color: #E7E5E4; color: #444; } /* Presencial */
-    .badge-v { background-color: #D6D3D1; color: #1C1917; } /* Virtual */
+    .badge-v { background-color: #F1F5F9; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; }
+    .badge-p { background-color: #F8FAFC; color: #64748B; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; border: 1px solid #E2E8F0; }
     </style>
     """, unsafe_allow_html=True)
 
 cookie_manager = stx.CookieManager()
 
-# --- 1. BASE DE DATOS COMPLETA ECONOMÍA ---
+# --- 1. BASE DE DATOS MAESTRA ECONOMÍA (PLAN 2023/25) ---
 PLAN_ECON = {
     "Primer Tramo": {
         241: "Análisis Matemático I", 242: "Economía", 245: "Álgebra", 
@@ -47,114 +46,123 @@ PLAN_ECON = {
         558: ["Economía Internacional", [286, 283]], 546: ["Econometría II", [543]],
         559: ["Desarrollo Económico", [554, 558]], 562: ["Seminario de Integración", [543, 558]]
     },
-    "Optativas": {
+    "Optativas/Orientadas": {
         763: ["Teoría de los Juegos", [291]], 563: ["Economía de la Innovación", [242]],
         520: ["Ciencia de Datos", [543]], 523: ["Econ. y Derecho Corp.", [251]],
-        457: ["Teoría de la Decisión", [540]], 561: ["Cuentas Nacionales", [262]]
+        457: ["Teoría de la Decisión", [540]], 561: ["Cuentas Nacionales", [262]],
+        288: ["Matemática para Economistas", [272]]
     }
 }
 
-# --- 2. OFERTA REAL (PROCESADA DE TUS FOTOS) ---
-# [Código, Docente, Horario, Sede, Ranking Corte, Registro Corte, Modalidad]
-OFERTA_REAL = [
-    [262, "WAINER", "07-09", "Córdoba", 144.6, 906762, "P"],
-    [262, "AGOSTINELLI", "11-13", "Córdoba", 137.2, 910774, "P"],
-    [291, "FAJFAR", "17-19", "Córdoba", 148.4, 907217, "P"],
-    [291, "JACK PABLO", "09-11", "Córdoba", 145.0, 909051, "V"],
-    [540, "BIANCO", "07-09", "Paternal", 147.2, 909450, "P"],
-    [540, "ZAIA", "19-21", "Córdoba", 150.0, 911693, "P"],
-    [544, "GARCIA FRONTI", "09-11", "Córdoba", 137.0, 912535, "P"],
-    [544, "FAJFAR", "17-19", "Virtual", 128.1, 913540, "V"],
-    [286, "AROMI", "09-11", "Córdoba", 156.5, 909143, "P"],
-    [286, "OJEDA", "19-21", "Paternal", 166.0, 901554, "P"],
-    [543, "CALICCHIO", "19-21", "Córdoba", 185.0, 897120, "P"],
-    [543, "VITALE", "07-09", "Córdoba", 161.8, 907635, "V"],
-    [554, "COREMBERG", "11-13", "Córdoba", 180.6, 896347, "P"],
-    [548, "KATZ", "07-09", "Córdoba", 177.4, 904971, "P"],
-    [556, "SIRLIN", "17-19", "Córdoba", 175.7, 909007, "P"],
-    [541, "HIST. ECON. ARG.", "11-13", "Córdoba", 141.0, 910000, "P"]
+# --- 2. OFERTA ACADÉMICA CARGADA DESDE TU PDF Y RANKINGS ---
+# [Cod, Docente, Horario, Sede, Ranking_Corte, Registro_Corte, Modalidad (R=Regular, V=Virtual)]
+OFERTA_TOTAL = [
+    # Macro I (262)
+    [262, "WAINER VALERIA", "07-09", "Córdoba", 144.6, 906762, "R"],
+    [262, "AGOSTINELLI", "11-13", "Córdoba", 137.2, 910774, "R"],
+    [262, "KRYSA ARIEL", "09-11", "Paternal", 140.0, 900000, "R"],
+    # Micro p/ Economistas (291)
+    [291, "FAJFAR PABLO", "17-19", "Córdoba", 148.4, 907217, "R"],
+    [291, "JACK PABLO", "09-11", "Virtual", 145.0, 909051, "V"],
+    # Análisis Estadístico (540)
+    [540, "BIANCO MARIA", "07-09", "Paternal", 147.2, 909450, "R"],
+    [540, "ZAIA ALEJANDRA", "19-21", "Córdoba", 150.0, 911693, "R"],
+    [540, "LARRA MATIAS", "09-11", "Avellaneda", 140.0, 900000, "R"],
+    # Matemática Aplicada II (544)
+    [544, "GARCIA FRONTI", "09-11", "Córdoba", 137.0, 912535, "R"],
+    [544, "FAJFAR PABLO", "17-19", "Virtual", 128.1, 913540, "V"],
+    # Microeconomía II (286)
+    [286, "AROMI JOSE", "09-11", "Córdoba", 156.5, 909143, "R"],
+    [286, "OJEDA MARIA", "19-21", "Paternal", 166.0, 901554, "R"],
+    [286, "ACOSTA JORGE", "07-09", "Virtual", 166.7, 900138, "V"],
+    # Econometría I (543)
+    [543, "CALICCHIO NICOLAS", "19-21", "Córdoba", 185.0, 897120, "R"],
+    [543, "VITALE BLANCA", "07-09", "Córdoba", 161.8, 907635, "V"],
+    [543, "FABRIS JULIO", "17-19", "Córdoba", 163.2, 906746, "R"],
+    # Crecimiento Económico (554)
+    [554, "COREMBERG ARIEL", "11-13", "Córdoba", 180.6, 896347, "R"],
+    # Dinero y Bancos (548)
+    [548, "KATZ SEBASTIAN", "07-09", "Córdoba", 177.4, 904971, "R"],
+    [548, "LORENZO GUIDO", "19-21", "Córdoba", 188.9, 894998, "R"],
+    # Finanzas Públicas (556)
+    [556, "SIRLIN PABLO", "17-19", "Córdoba", 175.7, 909007, "R"],
+    # Optativas
+    [545, "WEISMAN DIEGO", "11-13", "Córdoba", 121.6, 917588, "R"],
+    [763, "FAJFAR (Juegos)", "09-11", "Virtual", 170.5, 911168, "V"],
+    [563, "ARZA VALERIA", "09-11", "Virtual", 86.7, 920336, "V"]
 ]
 
 # --- 3. PERSISTENCIA ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_econ_vfinal")
+saved = cookies.get("fce_econ_v_final_full")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
 if not saved:
     saved = {"reg": "900000", "rank": 500.0, "aprob": [], "sedes": ["Córdoba", "Virtual"]}
 
-# --- 4. SIDEBAR ---
+# --- 4. SIDEBAR ORDENADO ---
 with st.sidebar:
     st.title("👤 Mi Perfil")
     u_reg = st.text_input("N° Registro:", value=saved["reg"])
     u_rank = st.number_input("Mi Ranking:", value=float(saved["rank"]))
-    u_sedes = st.multiselect("Sedes:", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Virtual"], default=saved["sedes"])
+    u_sedes = st.multiselect("Sedes:", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Avellaneda", "Virtual"], default=saved["sedes"])
     
     st.divider()
     st.subheader("✅ Materias Aprobadas")
     aprobadas = []
     
-    # TR0: Primer Tramo
-    with st.expander("Primer Tramo (CBC/FCE)", expanded=True):
+    with st.expander("1. Primer Tramo", expanded=(len(saved["aprob"]) < 6)):
         for cod, nom in PLAN_ECON["Primer Tramo"].items():
-            if st.checkbox(nom, value=(cod in saved["aprob"]), key=f"p_{cod}"):
-                aprobadas.append(cod)
+            if st.checkbox(nom, value=(cod in saved["aprob"]), key=f"p_{cod}"): aprobadas.append(cod)
     
-    # TR1: Ciclo Profesional
-    with st.expander("Ciclo Profesional"):
+    with st.expander("2. Ciclo Profesional"):
         for cod, info in PLAN_ECON["Ciclo Profesional"].items():
             faltan = [r for r in info[1] if r not in aprobadas]
-            bloq = len(faltan) > 0 and cod not in saved["aprob"]
-            if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"s_{cod}", disabled=bloq):
-                aprobadas.append(cod)
-    
-    # TR2: Optativas
-    with st.expander("Optativas / Orientadas"):
-        for cod, info in PLAN_ECON["Optativas"].items():
-            faltan = [r for r in info[1] if r not in aprobadas]
-            bloq = len(faltan) > 0 and cod not in saved["aprob"]
-            if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"o_{cod}", disabled=bloq):
-                aprobadas.append(cod)
+            bloq = (len(faltan) > 0 or len(aprobadas) < 6) and cod not in saved["aprob"]
+            if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"s_{cod}", disabled=bloq): aprobadas.append(cod)
+            if bloq: st.caption(f"🔒 Bloqueada. Faltan: {faltan if len(aprobadas)>=6 else 'CBC'}")
 
-    if st.button("💾 GUARDAR DATOS"):
+    with st.expander("3. Optativas"):
+        for cod, info in PLAN_ECON["Optativas/Orientadas"].items():
+            faltan = [r for r in info[1] if r not in aprobadas]
+            bloq = (len(faltan) > 0 or len(aprobadas) < 6) and cod not in saved["aprob"]
+            if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"o_{cod}", disabled=bloq): aprobadas.append(cod)
+
+    if st.button("💾 GUARDAR"):
         data = {"reg": u_reg, "rank": u_rank, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_econ_vfinal", json.dumps(data))
-        st.success("Guardado.")
+        cookie_manager.set("fce_econ_v_final_full", json.dumps(data))
+        st.success("Progreso guardado.")
 
 # --- 5. CUERPO PRINCIPAL ---
-st.title("🧩 Planificador Lic. en Economía")
+st.title("⚖️ Planificador Economía UBA")
 
-tab1, tab2 = st.tabs(["📝 Selección", "📋 Sugerencias de Cursada"])
+tab_sel, tab_suggest = st.tabs(["📝 Selección", "📋 Sugerencias de Cursada"])
 
-with tab1:
+with tab_sel:
     st.header("Materias para este cuatrimestre")
-    # Consolidar todas las materias en un solo diccionario para búsqueda
-    total_mats = {**PLAN_ECON["Primer Tramo"], **{k:v[0] for k,v in PLAN_ECON["Ciclo Profesional"].items()}, **{k:v[0] for k,v in PLAN_ECON["Optativas"].items()}}
+    total_mats_dict = {**PLAN_ECON["Primer Tramo"], **{k:v[0] for k,v in PLAN_ECON["Ciclo Profesional"].items()}, **{k:v[0] for k,v in PLAN_ECON["Optativas/Orientadas"].items()}}
     
     # Solo habilitadas
-    hab = {c: total_mats[c] for c in total_mats if c not in aprobadas}
-    # Filtro de correlatividades real
     hab_list = []
-    for c in hab:
-        reqs = []
-        if c in PLAN_ECON["Ciclo Profesional"]: reqs = PLAN_ECON["Ciclo Profesional"][c][1]
-        elif c in PLAN_ECON["Optativas"]: reqs = PLAN_ECON["Optativas"][c][1]
-        
-        if all(r in aprobadas for r in reqs):
+    for c, info in {**PLAN_ECON["Ciclo Profesional"], **PLAN_ECON["Optativas/Orientadas"]}.items():
+        if c not in aprobadas and all(r in aprobadas for r in info[1]) and len(aprobadas) >= 6:
             hab_list.append(c)
+    # Sumar tramo 1 faltante
+    for c, nom in PLAN_ECON["Primer Tramo"].items():
+        if c not in aprobadas: hab_list.append(c)
 
-    elegidas = st.multiselect("Materias habilitadas (Máximo 4):", options=hab_list, format_func=lambda x: f"{total_mats[x]} ({x})", max_selections=4)
+    elegidas = st.multiselect("Elegí hasta 4 materias:", options=hab_list, format_func=lambda x: f"{total_mats_dict[x]} ({x})", max_selections=4)
     
     st.divider()
-    st.subheader("Bloques Horarios Disponibles")
+    st.subheader("Bloques Horarios que podés cursar")
     bloques = ["07-09", "09-11", "11-13", "13-15", "15-17", "17-19", "19-21", "21-23"]
     cols_h = st.columns(8)
-    u_bloques = [b for i, b in enumerate(bloques) if cols_h[i].checkbox(b, value=True)]
+    u_bloques = [b for i, b in enumerate(bloques) if cols_h[i].checkbox(b, value=True, key=f"time_{b}")]
 
-with tab2:
+with tab_suggest:
     if elegidas:
-        oferta_f = [o for o in OFERTA_REAL if o[0] in elegidas and o[3] in u_sedes and o[2] in u_bloques]
+        oferta_f = [o for o in OFERTA_TOTAL if o[0] in elegidas and o[3] in u_sedes and o[2] in u_bloques]
         
         grupos = []
         for mid in elegidas:
@@ -168,51 +176,48 @@ with tab2:
             for combo in combos:
                 # 1. No choque horario
                 if len(set(x[2] for x in combo)) != len(combo): continue
-                # 2. Regla 3+1 (3 Presenciales max, 1 Virtual max)
+                # 2. Regla 3 Presenciales + 1 Virtual max
                 virts = len([x for x in combo if x[6] == "V"])
-                pres = len([x for x in combo if x[6] == "P"])
-                if virts <= 1 and pres <= 3:
-                    validos.append(combo)
+                if virts > 1: continue
+                validos.append(combo)
             
             if validos:
-                # Ordenar por Ranking y Registro
-                def scoring(c):
-                    score = 0
+                # Ranking logic score
+                def score(c):
+                    s = 0
                     for m in c:
-                        # Si tu ranking es mayor, score alto. Si es igual, comparamos registro.
-                        if u_rank > m[4]: score += 100
-                        elif u_rank == m[4] and int(u_reg) < m[5]: score += 50
-                    return score
+                        if u_rank > m[4]: s += 10
+                        if int(u_reg) <= m[5]: s += 5
+                    return s
                 
-                validos.sort(key=scoring, reverse=True)
+                validos.sort(key=score, reverse=True)
 
-                for i, combo in enumerate(validos[:2]):
-                    st.markdown(f"<div class='opcion-header'>OPCIÓN {i+1} DE CURSADA</div>", unsafe_allow_html=True)
+                for i, combo in enumerate(validos[:2]): # Opción 1 y 2
+                    st.markdown(f"<div class='opcion-title'>OPCIÓN {i+1}</div>", unsafe_allow_html=True)
                     cols = st.columns(len(combo))
                     for idx, c in enumerate(combo):
-                        mode = "VIRTUAL" if c[6] == "V" else "PRESENCIAL"
+                        mode_label = "VIRTUAL" if c[6] == "V" else "PRESENCIAL"
                         badge_class = "badge-v" if c[6] == "V" else "badge-p"
                         
-                        # Lógica de probabilidad real (Ranking + Registro)
-                        if u_rank > c[4]: prob = "ALTA"
-                        elif u_rank == c[4] and int(u_reg) <= c[5]: prob = "ALTA (Por Registro)"
-                        elif u_rank > c[4] - 10: prob = "MEDIA"
-                        else: prob = "BAJA"
+                        # Probabilidad
+                        if u_rank > c[4] + 10: prob, color = "ALTA", "#059669"
+                        elif u_rank > c[4] - 5: prob, color = "MEDIA", "#D97706"
+                        else: prob, color = "BAJA", "#DC2626"
                         
                         cols[idx].markdown(f"""
                             <div class="materia-card">
-                                <span class="badge {badge_class}">{mode}</span><br><br>
-                                <b>{total_mats[c[0]]}</b><br>
-                                <small>{c[1]}</small><br><br>
-                                <small>📍 {c[3]}</small><br>
-                                <small>⏰ {c[2]} hs</small>
-                                <hr style="border:0.5px solid #eee">
-                                <small style="color:#059669; font-weight:700">PROB: {prob}</small>
+                                <span class="{badge_class}">{mode_label}</span><br><br>
+                                <div style="font-weight:600; font-size:1.1em; color:#1E293B;">{total_mats_dict[c[0]]}</div>
+                                <div style="color:#64748B; font-size:0.9em; margin-bottom:12px;">{c[1]}</div>
+                                <div style="font-size:0.85em;">📍 {c[3]} | ⏰ {c[2]} hs</div>
+                                <hr style="border:0.5px solid #F1F5F9; margin: 12px 0;">
+                                <div style="color:{color}; font-weight:700; font-size:0.8em; text-align:center;">{prob}</div>
+                                <div style="font-size:0.7em; color:#94A3B8; text-align:center; margin-top:4px;">Corte: {c[4]} | Reg: {c[5]}</div>
                             </div>
                         """, unsafe_allow_html=True)
             else:
-                st.warning("No hay combinaciones que respeten la regla 3+1 (Max 3 presenciales + 1 virtual) con tus filtros de sede/horario.")
+                st.warning("No hay combinaciones que respeten la regla 3 Presenciales + 1 Virtual sin choque de horario.")
         else:
-            st.error("Faltan cátedras para alguna de las materias elegidas en tus sedes/horarios seleccionados.")
+            st.error("No hay cátedras cargadas para alguna de las materias elegidas en tus sedes o horarios.")
     else:
-        st.info("Elegí materias en la pestaña anterior para generar las opciones.")
+        st.info("Elegí las materias en la pestaña anterior para generar las sugerencias.")
