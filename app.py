@@ -23,7 +23,6 @@ st.markdown("""
     }
     .badge-v { background-color: #F1F5F9; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; }
     .badge-p { background-color: #F8FAFC; color: #64748B; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; border: 1px solid #E2E8F0; }
-    .rating { color: #F59E0B; font-weight: 700; font-size: 0.9em; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -34,12 +33,13 @@ PLAN_ECON = {
     "Primer Tramo": {241: "Análisis I", 242: "Economía", 245: "Álgebra", 246: "Hist. Gral.", 255: "Análisis Cont.", 256: "Gobierno"},
     "Ciclo Profesional": {
         540: ["Análisis Estadístico", [241]], 542: ["Mat. Aplicada I", [241, 245]], 262: ["Macroeconomía I", [242]],
-        291: ["Micro p/ Econ.", [542]], 541: ["Hist. Econ. Arg.", [246]], 544: ["Mat. Aplicada II", [542]],
-        556: ["Finanzas Públicas", [291]], 549: ["Econ. Financiera", [262, 291]], 283: ["Macroeconomía II", [262, 544]],
-        543: ["Econometría I", [540, 544]], 545: ["Epistemología", [262]], 555: ["Org. Industrial", [286]],
-        554: ["Crecimiento Econ.", [283, 291]], 286: ["Microeconomía II", [291, 544]], 558: ["Econ. Internacional", [262, 286]],
-        546: ["Econometría II", [543]], 559: ["Desarrollo Econ.", [262, 291, 543]], 547: ["Estructura y Pol.", [262, 541, 543, 556]],
-        562: ["Seminario Economía", [543, 558]], 548: ["Dinero y Bancos", [283, 546, 549]]
+        290: ["Microeconomía I", [242]], 291: ["Micro p/ Econ.", [542]], 541: ["Hist. Econ. Arg.", [246]], 
+        544: ["Mat. Aplicada II", [542]], 556: ["Finanzas Públicas", [291]], 549: ["Econ. Financiera", [262, 291]], 
+        283: ["Macroeconomía II", [262, 544]], 543: ["Econometría I", [540, 544]], 545: ["Epistemología", [262]], 
+        555: ["Org. Industrial", [286]], 554: ["Crecimiento Econ.", [283, 291]], 286: ["Microeconomía II", [291, 544]], 
+        558: ["Econ. Internacional", [262, 286]], 546: ["Econometría II", [543]], 
+        559: ["Desarrollo Económico", [262, 291, 543]], 547: ["Estructura y Pol. Econ.", [262, 541, 543, 556]],
+        562: ["Seminario Economía", [543, 558]], 548: ["Dinero, Crédito y Bancos", [283, 546, 549]]
     },
     "Optativas": {
         520: ["Ciencia Datos", [543]], 521: ["Econ. Austriaca", [242]], 763: ["Teoría Juegos", [291]],
@@ -47,68 +47,67 @@ PLAN_ECON = {
     }
 }
 
-# --- 2. OFERTA ACADÉMICA MAESTRA (CONSOLIDADA TOTAL) ---
+# --- 2. OFERTA ACADÉMICA MAESTRA (LA BASE TOTAL SIN BORRAR NADA) ---
 # [Cod, Cátedra, Profesor, Días, Horario, Sede, Ranking_Corte, Modalidad, Día_Virtual, Rating]
 OFERTA_TOTAL = [
-    # Macro I (262)
-    [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma/Mi/Vi", "07-09", "Córdoba", 144.6, "P", "", 4.9],
-    [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu/Mi/Ju", "09-11", "Córdoba", 140.0, "P", "", 4.4],
-    [262, "ZACK GUIDO", "Michelena Gabriel", "Lu/Mi/Ju", "09-11", "Avellaneda", 118.0, "P", "", 4.5],
-    [262, "ZACK GUIDO", "Cerdan Manuel", "Lu/Mi/Ju", "07-09", "Paternal", 130.0, "P", "", 4.2],
-    [262, "ZACK GUIDO", "Favata Federico", "Lu/Ju", "11-13", "San Isidro", 132.7, "P", "Lunes presencial", 4.1],
-    # Macro II (283)
-    [283, "ELOSEGUI", "Elosegui Pedro", "Ma/Vi/Sa", "17-19", "Córdoba", 170.0, "P", "Sábado virtual", 4.8],
-    [283, "RAPETTI", "Libman Emiliano", "Lu/Mi/Ju", "07-09", "Córdoba", 165.0, "P", "", 4.7],
-    [283, "RAPETTI", "Rapetti Martin", "Ma/Vi/Sa", "11-13", "Córdoba", 169.5, "P", "", 4.6],
-    [283, "RAPETTI", "Zack Guido", "Lu/Mi/Ju", "17-19", "Córdoba", 164.3, "P", "", 4.5],
-    [283, "RAPETTI", "Pierri Damian", "Lu/Mi/Ju", "19-21", "Córdoba", 158.4, "P", "", 4.3],
-    # Micro p/ Economistas (291) - RESTAURADA
-    [291, "APELLA", "Mercatante Juan", "Lu/Mi/Ju", "17-19", "Córdoba", 148.4, "P", "", 4.6],
-    [291, "APELLA", "Scheimberg Seb.", "Ma/Vi/Sa", "17-19", "Córdoba", 148.5, "P", "Sábado virtual", 4.4],
-    [291, "PETRECOLLA", "Petrecolla Diego", "Lu/Mi/Ju", "09-11", "Córdoba", 145.0, "P", "", 4.3],
-    [291, "PETRECOLLA", "Jack Pablo", "Lu/Mi/Ju", "09-11", "Virtual", 145.0, "V", "Virtual", 4.2],
-    [291, "PETRECOLLA", "Fajfar Pablo", "Lu/Mi/Ju", "11-13", "Córdoba", 148.0, "P", "", 4.7],
-    # Matemática Aplicada II (544) - RESTAURADA
-    [544, "BIANCO", "Tarullo Eduardo", "Lu/Mi/Ju", "09-11", "Córdoba", 137.0, "P", "", 4.0],
-    [544, "GARCIA FRONTI", "Morrone Rita", "Lu/Mi/Ju", "07-09", "Córdoba", 135.0, "P", "", 4.2],
-    [544, "ZORZOLI", "Fajfar Pablo", "Lu/Mi/Ju", "07-09", "Córdoba", 128.1, "P", "", 4.5],
-    [544, "BIANCO", "Garcia Fronti V.", "Ma/Vi/Sa", "09-11", "Córdoba", 137.0, "P", "", 4.4],
-    # Hist Econ Arg (541)
+    # --- Microeconomía I (290) ---
+    [290, "JACK PABLO", "Jack Pablo", "Lu/Mi/Ju", "09-11", "Córdoba", 148.6, "P", "", 4.5],
+    [290, "FAJFAR PABLO", "Fajfar Pablo", "Lu/Mi/Ju", "09-11", "Córdoba", 134.0, "P", "", 4.3],
+    # --- Microeconomía II (286) ---
+    [286, "AROMI", "Pascuini Paulo", "Lu/Mi/Ju", "09-11", "Córdoba", 156.5, "P", "", 4.3],
+    [286, "AROMI", "Aromi Jose", "Lu/Mi/Ju", "11-13", "Córdoba", 156.0, "P", "", 4.4],
+    [286, "AROMI", "Ojeda Maria", "Lu/Mi/Ju", "17-19", "Córdoba", 166.0, "P", "", 4.6],
+    [286, "AROMI", "Acosta Jorge", "Ma/Vi/Sa", "09-11", "Córdoba", 164.6, "P", "", 4.5],
+    # --- Matemática Aplicada I (542) ---
+    [542, "BIANCO", "Paniagua Fabian", "Lu/Mi/Ju", "07-09", "Córdoba", 130.0, "P", "", 4.1],
+    [542, "BIANCO", "Morrone Rita", "Lu/Mi/Ju", "09-11", "Córdoba", 132.0, "P", "", 4.3],
+    [542, "GARCIA FRONTI", "Krimker Gabriel", "Ma/Vi/Sa", "09-11", "Paternal", 137.0, "P", "", 4.0],
+    # --- Historia Económica Argentina (541) ---
     [541, "BELINI", "Belini Claudio", "Ma/Vi", "09-11", "Paternal", 141.0, "P", "", 4.8],
     [541, "ROUGIER", "Kulfas / Salles", "Ma/Vi", "09-11", "Córdoba", 145.0, "P", "", 4.7],
-    # Matemática Aplicada I (542)
-    [542, "BIANCO", "Paniagua Fabian", "Lu/Mi/Ju", "07-09", "Córdoba", 130.0, "P", "", 4.1],
-    # Econometría I (543)
-    [543, "CALICCHIO", "Calicchio Nicolas", "Lu/Mi/Ju", "19-21", "Córdoba", 185.0, "P", "", 4.5],
-    [543, "VITALE", "Vitale Blanca", "Lu/Mi/Ju", "07-09", "Virtual", 161.8, "V", "Virtual", 4.2],
-    # Internacional (558)
+    # --- Econometría II (546) ---
+    [546, "BRUFMAN", "Brufman / Trajtenberg", "Lu/Mi/Ju", "09-11", "Córdoba", 185.0, "P", "", 4.8],
+    [546, "GONZALEZ MIRTA", "Gonzalez Mirta", "Lu/Mi/Ju", "09-11", "Córdoba", 175.0, "P", "", 4.5],
+    # --- Desarrollo Económico (559) ---
+    [559, "LOPEZ ANDRES", "Ronconi Lucas", "Lu/Ju", "09-11", "Córdoba", 175.7, "P", "", 4.4],
+    [559, "LOPEZ ANDRES", "Lopez Andres", "Lu/Ju", "19-21", "Córdoba", 168.0, "P", "", 4.6],
+    # --- Economía Financiera (549) ---
+    [549, "GOMEZ JUAN", "Milia Daniel", "Lu/Ju", "19-21", "Córdoba", 160.0, "P", "", 4.5],
+    # --- Estructura (547) ---
+    [547, "MAURIZIO", "Maurizio / Kulfas", "Lu/Ju", "09-11", "Córdoba", 153.5, "P", "Jueves Virtual", 4.6],
+    # --- Macro I (262) ---
+    [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma/Mi/Vi", "07-09", "Córdoba", 144.6, "P", "", 4.9],
+    [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu/Mi/Ju", "09-11", "Córdoba", 140.0, "P", "", 4.4],
+    # --- Macro II (283) ---
+    [283, "ELOSEGUI", "Elosegui Pedro", "Ma/Vi/Sa", "17-19", "Córdoba", 170.0, "P", "Sábado virtual", 4.8],
+    [283, "RAPETTI", "Libman Emiliano", "Lu/Mi/Ju", "07-09", "Córdoba", 165.0, "P", "", 4.7],
+    # --- Internacional (558) ---
     [558, "HALLAK", "Hallak Juan Carlos", "Lu/Ju", "11-13", "Córdoba", 185.0, "P", "", 4.9],
     [558, "ALBORNOZ", "Albornoz Crespo", "Lu/Ju", "17-19", "Córdoba", 193.4, "P", "", 4.3],
-    # Org Industrial (555)
-    [555, "PETRECOLLA", "Petrecolla Diego", "Lu/Ju", "09-11", "Córdoba", 207.4, "P", "", 4.4],
-    # Estructura (547)
-    [547, "MAURIZIO", "Maurizio / Kulfas", "Lu/Ju", "09-11", "Córdoba", 153.5, "P", "Jueves Virtual", 4.6],
-    # Crecimiento (554)
+    # --- Crecimiento (554) ---
     [554, "KEIFMAN", "Herrero Diego", "Lu/Ju", "09-11", "Córdoba", 180.0, "P", "", 4.1],
-    [554, "KEIFMAN", "Coremberg Ariel", "Ma/Vi", "19-21", "Córdoba", 180.6, "P", "", 4.7],
-    # Dinero y Bancos (548)
+    # --- Dinero y Bancos (548) ---
     [548, "KATZ", "Katz Sebastian", "Ma/Vi", "07-09", "Córdoba", 196.5, "P", "", 5.0],
-    # Ciencia de Datos (520)
+    # --- Ciencia de Datos (520) ---
     [520, "DPTO. ECONOMÍA", "Sidicaro Nicolas", "Ma/Vi", "09-11", "Córdoba", 183.9, "P", "", 4.7],
-    # Finanzas Públicas (556)
+    # --- Finanzas Públicas (556) ---
     [556, "CURCIO", "Curcio Javier", "Ma/Vi", "17-19", "Córdoba", 175.7, "P", "", 4.4],
-    # Epistemología (545)
-    [545, "WEISMAN", "Weisman Diego", "Ma/Vi", "11-13", "Córdoba", 138.0, "P", "", 4.5]
+    # --- Epistemología (545) ---
+    [545, "WEISMAN", "Weisman Diego", "Ma/Vi", "11-13", "Córdoba", 138.0, "P", "", 4.5],
+    # --- Matemática Aplicada II (544) ---
+    [544, "BIANCO", "Tarullo Eduardo", "Lu/Mi/Ju", "09-11", "Córdoba", 137.0, "P", "", 4.0],
+    # --- Estadística (540) ---
+    [540, "ZAIA", "Zaia Alejandra", "Ma/Mi/Vi", "09-11", "Córdoba", 150.0, "P", "", 4.6]
 ]
 
 # --- 3. PERSISTENCIA ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_econ_v_final_full_ultimate")
+saved = cookies.get("fce_econ_v_final_mega")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
 if not saved:
-    saved = {"reg": "910981", "rank": 180.0, "aprob": [], "sedes": ["Córdoba", "Virtual"]}
+    saved = {"reg": "910981", "rank": 180.0, "aprob": [], "sedes": ["Córdoba", "Virtual", "Paternal"]}
 
 # --- 4. SIDEBAR ---
 with st.sidebar:
@@ -117,6 +116,10 @@ with st.sidebar:
     u_rank = st.number_input("Mi Ranking:", value=float(saved["rank"]))
     u_sedes = st.multiselect("Sedes:", ["Córdoba", "Paternal", "Pilar", "San Isidro", "Avellaneda", "Virtual"], default=saved["sedes"])
     
+    st.divider()
+    st.markdown(f"[🔗 Ir a la Web del CECE](https://cece.org)")
+    st.caption("Usa este link para ver la oferta oficial cuando el sistema esté online.")
+
     st.divider()
     st.subheader("✅ Materias Aprobadas")
     aprobadas = []
@@ -129,7 +132,6 @@ with st.sidebar:
             faltan = [r for r in info[1] if r not in aprobadas]
             bloq = (len(faltan) > 0 or not cbc_ok) and cod not in saved["aprob"]
             if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"s_{cod}", disabled=bloq): aprobadas.append(cod)
-            if bloq: st.caption(f"🔒 Falta: {faltan if cbc_ok else 'CBC'}")
     with st.expander("3. Optativas"):
         for cod, info in PLAN_ECON["Optativas"].items():
             faltan = [r for r in info[1] if r not in aprobadas]
@@ -138,8 +140,8 @@ with st.sidebar:
 
     if st.button("💾 GUARDAR DATOS"):
         data = {"reg": u_reg, "rank": u_rank, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_econ_v_final_full_ultimate", json.dumps(data))
-        st.success("Guardado.")
+        cookie_manager.set("fce_econ_v_final_mega", json.dumps(data))
+        st.success("¡Guardado!")
 
 # --- 5. LÓGICA DE FILTRADO ---
 total_mats_names = {**PLAN_ECON["Primer Tramo"], **{k:v[0] for k,v in PLAN_ECON["Ciclo Profesional"].items()}, **{k:v[0] for k,v in PLAN_ECON["Optativas"].items()}}
@@ -161,7 +163,6 @@ with tab_sel:
 
 with tab_suggest:
     if elegidas:
-        # Filtrado cruzado de sede y horario
         oferta_f = [o for o in OFERTA_TOTAL if o[0] in elegidas and (o[5] in u_sedes) and o[4] in u_bloques]
         
         def find_valid_combos(target_subjects):
@@ -186,6 +187,7 @@ with tab_suggest:
 
         validos = find_valid_combos(elegidas)
         if not validos:
+            # Lógica de subsets si hay choques para dar Opcion 1 y Opcion 2 separadas
             for i in range(len(elegidas)-1, 0, -1):
                 subsets = []
                 for sub in combinations(elegidas, i):
@@ -207,7 +209,7 @@ with tab_suggest:
                         st.markdown(f"Cátedra: **{c[1]}** | Prof: {c[2]}")
                         st.markdown(f"📅 {c[3]} | ⏰ **{c[4]} hs** | 📍 {c[5]}")
                         if c[8]: st.markdown(f":blue[💻 Día Virtual: {c[8]}]")
-                        st.markdown(f"⭐ **Puntaje Alumnos: {c[9]} / 5.0**")
+                        st.markdown(f"⭐ **Rating: {c[9]}**")
                         st.markdown(f"<p style='color:{color}; font-weight:700; text-align:center;'>PROB: {prob}</p>", unsafe_allow_html=True)
                         st.markdown("---")
         else: st.error("No hay oferta cargada para estas materias en tus filtros.")
