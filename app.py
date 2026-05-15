@@ -28,7 +28,7 @@ st.markdown("""
 
 cookie_manager = stx.CookieManager()
 
-# --- 1. BASE DE DATOS DE MATERIAS (PLAN 2026) ---
+# --- 1. BASE DE DATOS DE MATERIAS (PLAN 2026 ACTUALIZADO) ---
 PLAN_ECON = {
     "Primer Tramo": {
         241: "Análisis Matemático I", 242: "Economía", 245: "Álgebra", 
@@ -49,80 +49,91 @@ PLAN_ECON = {
     },
     "Optativas": {
         520: ["Ciencia de Datos", [543]], 763: ["Teoría de Juegos", [291]],
-        563: ["Economía de Innovación", [242]], 521: ["Economía Austriaca", [242]]
+        563: ["Economía de Innovación", [242]], 521: ["Economía Austriaca", [242]],
+        523: ["Econ. y Derecho Corp.", [256]], 547: ["Estructura y Pol.", [262, 541, 543, 556]]
     }
 }
 
-# --- 2. OFERTA ACADÉMICA TOTAL (10 CAMPOS POR FILA) ---
+# --- 2. OFERTA ACADÉMICA CALIFICADA TOTAL (10 CAMPOS POR FILA) ---
+# [Cod, Cátedra, Profesor, Días, Horario, Sede, Ranking_Corte, Registro_Corte, Modalidad, Día_Virtual]
 O_TOTAL = [
-    # Epistemología (545)
+    # --- Desarrollo Económico (559) - ¡NUEVO! ---
+    [559, "LOPEZ ANDRES", "Ronconi Lucas", "Lu / Ju", "09-11", "Córdoba", 175.7, 909000, "P", ""],
+    [559, "LOPEZ ANDRES", "Gonzalez Juan Pablo", "Ma / Vi", "17-19", "Córdoba", 170.0, 903010, "P", ""],
+    [559, "LOPEZ ANDRES", "Lopez Andres Flavio", "Lu / Ju", "19-21", "Córdoba", 168.0, 909000, "P", ""],
+    [559, "SIRLIN PABLO", "Sirlin Pablo", "Ma / Vi", "17-19", "Córdoba", 175.7, 909007, "P", ""],
+
+    # --- Epistemología (545) ---
     [545, "HABERFELD", "Haberfeld Leandro", "Ma / Vi", "09-11", "Córdoba", 140.0, 900000, "P", ""],
     [545, "WEISMAN", "Weisman Diego", "Ma / Vi", "11-13", "Córdoba", 138.0, 900000, "P", ""],
     [545, "HABERFELD", "Arana Mariano", "Lu / Ju", "17-19", "Córdoba", 135.0, 910000, "P", ""],
     
-    # Economía Internacional (558)
+    # --- Economía Internacional (558) ---
     [558, "HALLAK", "Hallak Juan Carlos", "Lu / Ju", "11-13", "Córdoba", 185.0, 900000, "P", ""],
     [558, "ALBORNOZ", "Albornoz Crespo", "Lu / Ju", "17-19", "Córdoba", 193.4, 899254, "P", ""],
     [558, "HALLAK", "Soltz Hernan", "Lu / Ju", "19-21", "Córdoba", 170.0, 910000, "P", ""],
 
-    # Organización Industrial (555)
+    # --- Organización Industrial (555) ---
     [555, "MACEIRA", "Maceira Daniel", "Ma / Vi", "09-11", "Córdoba", 173.1, 898636, "P", ""],
     [555, "PETRECOLLA", "Petrecolla Diego", "Lu / Ju", "09-11", "Córdoba", 207.4, 899476, "P", ""],
     [555, "PETRECOLLA", "Romero G. E.", "Lu / Ju", "17-19", "Córdoba", 197.1, 910103, "P", ""],
 
-    # Macro I (262)
+    # --- Macro I (262) ---
     [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma / Mi / Vi", "07-09", "Córdoba", 144.6, 906762, "P", ""],
     [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu / Mi / Ju", "09-11", "Córdoba", 140.0, 910774, "P", ""],
     
-    # Macro II (283)
+    # --- Macro II (283) ---
     [283, "ELOSEGUI", "Elosegui Pedro", "Ma / Vi / Sa", "17-19", "Córdoba", 170.0, 895832, "P", "Sábado Virtual"],
     [283, "RAPETTI", "Libman Emiliano", "Lu / Mi / Ju", "07-09", "Córdoba", 165.0, 900000, "P", ""],
+    [283, "RAPETTI", "Rapetti Martin", "Ma / Vi / Sa", "11-13", "Córdoba", 169.5, 906199, "P", ""],
     
-    # Micro I (290)
+    # --- Micro I (290) ---
     [290, "JACK PABLO", "Jack Pablo", "Lu / Mi / Ju", "09-11", "Córdoba", 148.6, 909051, "P", ""],
+    [290, "FAJFAR PABLO", "Fajfar Pablo", "Lu / Mi / Ju", "09-11", "Córdoba", 134.0, 907217, "P", ""],
     
-    # Micro II (286)
+    # --- Micro II (286) ---
     [286, "AROMI", "Pascuini Paulo", "Lu / Mi / Ju", "09-11", "Córdoba", 156.5, 909143, "P", ""],
     [286, "AROMI", "Aromi Jose", "Lu / Mi / Ju", "11-13", "Córdoba", 156.0, 909000, "P", ""],
 
-    # Matemática Aplicada I (542)
+    # --- Matemática Aplicada I (542) ---
     [542, "BIANCO", "Paniagua Fabian", "Lu / Mi / Ju", "07-09", "Córdoba", 130.0, 910000, "P", ""],
     [542, "BIANCO", "Morrone Rita", "Lu / Mi / Ju", "09-11", "Córdoba", 132.0, 900000, "P", ""],
+    [542, "GARCIA FRONTI", "Krimker Gabriel", "Ma / Vi / Sa", "09-11", "Paternal", 137.0, 912535, "P", ""],
 
-    # Matemática Aplicada II (544)
+    # --- Matemática Aplicada II (544) ---
     [544, "TARULLO", "Tarullo Eduardo", "Lu / Mi / Ju", "09-11", "Córdoba", 137.0, 912535, "P", ""],
     [544, "BIANCO", "Morrone Rita", "Lu / Mi / Ju", "07-09", "Córdoba", 135.0, 900000, "P", ""],
 
-    # Econometría I (543)
+    # --- Econometría I (543) ---
     [543, "CALICCHIO", "Calicchio Nicolas", "Lu / Mi / Ju", "19-21", "Córdoba", 185.0, 897120, "P", ""],
     [543, "VITALE", "Vitale Blanca", "Lu / Mi / Ju", "07-09", "Virtual", 161.8, 907635, "V", "Virtual 100%"],
 
-    # Econometría II (546)
+    # --- Econometría II (546) ---
     [546, "BRUFMAN", "Trajtenberg L.", "Lu / Mi / Ju", "09-11", "Córdoba", 185.0, 897120, "P", ""],
 
-    # Estructura (547)
+    # --- Estructura (547) ---
     [547, "MAURIZIO", "Maurizio / Kulfas", "Lu / Ju", "09-11", "Córdoba", 153.5, 911350, "P", "Jueves Virtual"],
 
-    # Historia Económica Arg. (541)
+    # --- Historia Económica Arg. (541) ---
     [541, "BELINI", "Belini Claudio", "Ma / Vi", "09-11", "Paternal", 141.0, 910000, "P", ""],
     [541, "ROUGIER", "Kulfas / Salles", "Ma / Vi", "09-11", "Córdoba", 145.0, 900000, "P", ""],
 
-    # Finanzas Públicas (556)
+    # --- Finanzas Públicas (556) ---
     [556, "CURCIO", "Curcio Javier", "Ma / Vi", "17-19", "Córdoba", 175.7, 909007, "P", ""],
 
-    # Dinero, Crédito y Bancos (548)
+    # --- Dinero, Crédito y Bancos (548) ---
     [548, "KATZ", "Katz Sebastian", "Ma / Vi", "07-09", "Córdoba", 196.5, 899452, "P", ""],
 
-    # Ciencia de Datos (520)
+    # --- Ciencia de Datos (520) ---
     [520, "DPTO. ECONOMÍA", "Sidicaro Nicolas", "Ma / Vi", "09-11", "Córdoba", 183.9, 905528, "P", ""],
 
-    # Crecimiento (554)
+    # --- Crecimiento (554) ---
     [554, "KEIFMAN", "Coremberg Ariel", "Ma / Vi", "19-21", "Córdoba", 180.6, 896347, "P", ""]
 ]
 
 # --- 3. PERSISTENCIA ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_v_final_complete")
+saved = cookies.get("fce_v_final_complete_v2")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
@@ -150,9 +161,16 @@ with st.sidebar:
             faltan = [str(r) for r in info[1] if r not in aprobadas]
             bloq = (len(faltan) > 0 or not cbc_ok) and cod not in saved["aprob"]
             if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"s_{cod}", disabled=bloq): aprobadas.append(cod)
+            if bloq: st.caption(f"🔒 Falta: {faltan if cbc_ok else 'CBC'}")
+    with st.expander("3. Optativas"):
+        for cod, info in PLAN_ECON["Optativas"].items():
+            faltan = [str(r) for r in info[1] if r not in aprobadas]
+            bloq = (len(faltan) > 0 or not cbc_ok) and cod not in saved["aprob"]
+            if st.checkbox(info[0], value=(cod in saved["aprob"]), key=f"o_{cod}", disabled=bloq): aprobadas.append(cod)
+    
     if st.button("💾 GUARDAR DATOS"):
         data = {"reg": u_reg, "rank": u_rank, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_v_final_complete", json.dumps(data))
+        cookie_manager.set("fce_v_final_complete_v2", json.dumps(data))
         st.success("Guardado.")
 
 # --- 5. LÓGICA DE FILTRADO ---
@@ -214,8 +232,8 @@ with tab_suggest:
                 for idx, c in enumerate(combo):
                     badge = "badge-v" if c[8] == "V" else "badge-p"
                     diff = u_rank - c[6]
-                    color = "#059669" if diff > 10 else "#D97706" if diff > -10 else "#DC2626"
                     prob = "ALTA" if diff > 10 else "MEDIA" if diff > -10 else "BAJA"
+                    color = "#059669" if prob == "ALTA" else "#D97706" if prob == "MEDIA" else "#DC2626"
                     with cols[idx]:
                         st.markdown(f"""
                         <div class="materia-card">
