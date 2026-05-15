@@ -4,7 +4,7 @@ import extra_streamlit_components as stx
 import json
 from itertools import combinations, product
 
-# --- CONFIGURACIÓN ESTÉTICA ZEN ---
+# --- CONFIGURACIÓN ESTÉTICA ---
 st.set_page_config(page_title="Planificador Economía UBA", layout="wide")
 
 st.markdown("""
@@ -28,7 +28,7 @@ st.markdown("""
 
 cookie_manager = stx.CookieManager()
 
-# --- 1. BASE DE DATOS DE MATERIAS (PLAN 2026) ---
+# --- 1. BASE DE DATOS DE MATERIAS (PLAN 2026 ACTUALIZADO) ---
 PLAN_ECON = {
     "Primer Tramo": {
         241: "Análisis Matemático I", 242: "Economía", 245: "Álgebra", 
@@ -45,30 +45,35 @@ PLAN_ECON = {
         286: ["Microeconomía II", [291, 544]], 558: ["Econ. Internacional", [262, 286]],
         546: ["Econometría II", [543]], 559: ["Desarrollo Económico", [262, 291, 543]],
         547: ["Estructura y Pol. Econ.", [262, 541, 543, 556]],
-        562: ["Seminario Economía", [543, 558]], 548: ["Dinero, Crédito y Bancos", [283, 546, 549]]
+        548: ["Dinero, Crédito y Bancos", [283, 546, 549]]
     },
     "Optativas": {
-        525: ["Tópicos de Economía Digital", [262]], 520: ["Ciencia de Datos", [543]], 
-        763: ["Teoría de Juegos", [291]], 563: ["Economía de Innovación", [242]], 
-        521: ["Economía Austriaca", [242]]
+        562: ["Seminario de Integración", [543, 558]], # PASADO A OPTATIVAS
+        525: ["Tópicos de Economía Digital", [262]], 
+        520: ["Ciencia de Datos", [543]], 
+        763: ["Teoría de Juegos", [291]],
+        563: ["Economía de Innovación", [242]]
     }
 }
 
-# --- 2. BASE DE DATOS DE OFERTA COMPLETA (PROCESADA TOTAL) ---
-# [Cod, Cátedra, Profesor, Días, Horario, Sede, Ranking, Registro, Modalidad, VirtualDay]
+# --- 2. BASE DE DATOS DE OFERTA COMPLETA (10 CAMPOS POR FILA) ---
 O_TOTAL = [
+    # 562 - Seminario de Integración
+    [562, "WEISMAN", "Ruggeri Cesar", "Jueves", "09-11", "Córdoba", 257.0, 896832, "P", ""],
+    [562, "WEISMAN", "Carciofi Ignacio", "Martes", "17-19", "Córdoba", 250.0, 900000, "P", ""],
+    [562, "WEISMAN", "Pustilnik Ruth", "Lunes", "19-21", "Córdoba", 259.0, 885372, "P", ""],
+
     # 525 - Tópicos Economía Digital
     [525, "DPTO. ECONOMÍA", "Coll Agustin Julian", "Ma / Vi", "17-19", "Córdoba", 140.0, 900000, "P", ""],
     
     # 262 - Macroeconomía I
-    [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma / Mi / Vi", "07-09", "Córdoba", 144.6, 906762, "P", ""],
-    [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu / Mi / Ju", "09-11", "Córdoba", 140.0, 910774, "P", ""],
-    [262, "ZACK GUIDO", "Michelena Gabriel", "Lu / Mi / Ju", "09-11", "Avellaneda", 118.0, 914145, "P", ""],
+    [262, "DPTO. ECONOMÍA", "Pastor Joaquin", "Ma/Mi/Vi", "07-09", "Córdoba", 144.6, 906762, "P", ""],
+    [262, "DPTO. ECONOMÍA", "Krysa Ariel", "Lu/Mi/Ju", "09-11", "Córdoba", 140.0, 910774, "P", ""],
+    [262, "ZACK GUIDO", "Michelena Gabriel", "Lu/Mi/Ju", "09-11", "Avellaneda", 118.0, 914145, "P", ""],
     
     # 283 - Macroeconomía II
-    [283, "ELOSEGUI", "Elosegui Pedro", "Ma / Vi / Sa", "17-19", "Córdoba", 170.0, 895832, "P", "Sábado Virtual"],
-    [283, "RAPETTI", "Libman Emiliano", "Lu / Mi / Ju", "07-09", "Córdoba", 165.0, 900000, "P", ""],
-    [283, "RAPETTI", "Rapetti Martin", "Ma / Vi / Sa", "11-13", "Córdoba", 169.5, 906199, "P", ""],
+    [283, "ELOSEGUI", "Elosegui Pedro", "Ma/Vi/Sa", "17-19", "Córdoba", 170.0, 895832, "P", "Sábado Virtual"],
+    [283, "RAPETTI", "Libman Emiliano", "Lu/Mi/Ju", "07-09", "Córdoba", 165.0, 900000, "P", ""],
     
     # 290 - Microeconomía I
     [290, "JACK PABLO", "Jack Pablo", "Lu / Mi / Ju", "09-11", "Córdoba", 148.6, 909051, "P", ""],
@@ -129,16 +134,13 @@ O_TOTAL = [
     # 559 - Desarrollo Económico
     [559, "LOPEZ ANDRES", "Ronconi Lucas", "Lu / Ju", "09-11", "Córdoba", 175.7, 909000, "P", ""],
     
-    # 545 - Epistemología
-    [545, "WEISMAN", "Weisman Diego", "Ma / Vi", "11-13", "Córdoba", 138.0, 900000, "P", ""],
-    
     # 520 - Ciencia de Datos
     [520, "DPTO. ECONOMÍA", "Sidicaro Nicolas", "Ma / Vi", "09-11", "Córdoba", 183.9, 905528, "P", ""]
 ]
 
 # --- 3. PERSISTENCIA ---
 cookies = cookie_manager.get_all()
-saved = cookies.get("fce_v_final_economy_v11")
+saved = cookies.get("fce_v_final_economy_v12")
 if saved:
     try: saved = json.loads(saved)
     except: saved = None
@@ -180,7 +182,7 @@ with st.sidebar:
 
     if st.button("💾 GUARDAR DATOS"):
         data = {"reg": u_reg, "rank": u_rank, "aprob": aprobadas, "sedes": u_sedes}
-        cookie_manager.set("fce_v_final_economy_v11", json.dumps(data))
+        cookie_manager.set("fce_v_final_economy_v12", json.dumps(data))
         st.success("Guardado.")
 
 # --- 5. LÓGICA DE FILTRADO DINÁMICO ---
@@ -260,3 +262,4 @@ with tab_suggest:
                         </div>
                         """, unsafe_allow_html=True)
         else: st.error("No hay oferta cargada para estas materias en tus filtros.")
+    else: st.info("Seleccioná materias en la pestaña anterior.")
